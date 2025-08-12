@@ -9,13 +9,13 @@ const jsonData = {
   "senderName": "Араик",
   "personalMessage": "Я не опоздал - это ты рано родился",
   "images": [
-    "./img/1.jpg",
-    "./img/2.jpg",
-    "./img/3.jpg",
-    "./img/4.jpg",
-    "./img/5.jpg"
+    "./../img/1.jpg",
+    "./../img/2.jpg",
+    "./../img/3.jpg",
+    "./../img/4.jpg",
+    "./../img/5.jpg"
   ],
-  "qrCode": "./img/qr.png",
+  "qrCode": "./../img/qr.png",
   "pushPins": [
     {},
     {},

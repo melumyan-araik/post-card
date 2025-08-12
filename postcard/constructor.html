@@ -20,7 +20,7 @@
             background: linear-gradient(135deg, #4c75af 0%, #214b88 100%);
             color: white;
             padding: 15px 20px;
-            display: flex;
+			display: flex;
             justify-content: space-between;
             align-items: center;
         }
@@ -49,7 +49,7 @@
             border: 1px solid rgba(255,255,255,0.3);
         }
         
-        .main {
+		 .main {
             display: flex;
             height: calc(100vh - 70px);
         }
@@ -218,7 +218,7 @@
         
         .notification.error {
             background-color: #e74c3c;
-        }
+		}
     </style>
 </head>
 <body>
@@ -230,8 +230,8 @@
         </div>
     </div>
     
-    <div class="main">
-        <div class="settings">
+	<div class="main">
+    <div class="settings">
             <form id="cardForm">
                 <div class="section-title">📝 Основная информация</div>
                 
@@ -243,19 +243,19 @@
                 <div class="form-group">
                     <label for="event">Событие</label>
                     <input type="text" id="event" class="form-control" placeholder="Например: День Рождения" value="День Рождения">
-                </div>
-                
+    </div>
+
                 <div class="section-title">👤 Персональные данные</div>
                 
                 <div class="form-group">
                     <label for="recipientName">Имя получателя</label>
                     <input type="text" id="recipientName" class="form-control" placeholder="Имя того, кого поздравляем" value="Вадюша">
-                </div>
-                
+                  </div>
+				  
                 <div class="form-group">
                     <label for="senderName">Имя отправителя</label>
                     <input type="text" id="senderName" class="form-control" placeholder="Ваше имя" value="Араик">
-                </div>
+                  </div>
                 
                 <div class="section-title">💌 Поздравления</div>
                 
@@ -267,8 +267,8 @@
                 <div class="form-group">
                     <label for="personalMessage">Личное сообщение</label>
                     <textarea id="personalMessage" class="form-control" placeholder="Добавьте личное сообщение..." rows="3">Я не опоздал - это ты рано родился</textarea>
-                </div>
-                
+            </div>
+
                 <div class="section-title">🖼️ Изображения</div>
                 
                 <div class="form-group">
@@ -279,26 +279,26 @@
                 <div class="form-group">
                     <label for="qrCode">QR-код или сертификат</label>
                     <input type="file" id="qrCode" class="form-control" accept="image/*">
-                </div>
+                                    </div>
                 
                 <button type="button" class="btn-save" onclick="saveCard()">
                     💾 Сохранить открытку
                 </button>
             </form>
-        </div>
+                                    </div>
         
         <div class="preview">
             <div class="preview-container">
                 <div class="preview-header">
                     <h2 id="previewTitle">Поздравление</h2>
-                </div>
+                                </div>
                 
                 <div class="preview-content">
                     <div class="preview-field">
                         <label>Событие</label>
                         <div class="value" id="previewEvent">День Рождения</div>
-                    </div>
-                    
+                            </div>
+
                     <div class="slider-preview" id="sliderPreview">
                         <img src="./img/system/fot.gif" alt="Предварительный просмотр">
                     </div>
@@ -306,29 +306,29 @@
                     <div class="preview-field">
                         <label>Получатель</label>
                         <div class="value" id="previewRecipient">Вадюша</div>
-                    </div>
+								  </div>
                     
                     <div class="preview-field">
                         <label>Поздравления</label>
                         <div class="value" id="previewWishes">Поздравляю с днем рождения!<br>Желаю всего самого наилучшего!</div>
-                    </div>
-                    
+							  </div>
+							
                     <div class="preview-field">
                         <label>Отправитель</label>
                         <div class="value" id="previewSender">Араик</div>
-                    </div>
-                    
+                </div>
+
                     <div class="preview-field">
                         <label>Личное сообщение</label>
                         <div class="value" id="previewMessage">Я не опоздал - это ты рано родился</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     
     <div class="notification" id="notification"></div>
-
+    
     <script>
         // Глобальные переменные
         let cardData = {
