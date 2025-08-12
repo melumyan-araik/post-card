@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор поздравительной открытки</title>
+    <link rel="stylesheet" type="text/css" href="./css/partner_card.css@v=1614772361.css"/>
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'GothamPro', Arial, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4c75af 0%, #214b88 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 { font-size: 24px; font-weight: 300; }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #72bf44;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .main {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        
+        .settings {
+            width: 400px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .preview {
+            flex: 1;
+            background: #f8f9fa;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4c75af;
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4c75af;
+        }
+        
+        .preview-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .preview-header {
+            background: linear-gradient(135deg, #4c75af 0%, #214b88 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .preview-header h2 {
+            font-size: 20px;
+            font-weight: 300;
+            margin: 0;
+        }
+        
+        .preview-content {
+            padding: 20px;
+        }
+        
+        .preview-field {
+            margin-bottom: 15px;
+        }
+        
+        .preview-field label {
+            font-weight: 600;
+            color: #333;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .preview-field .value {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .preview-field .value.empty {
+            color: #ccc;
+            font-style: italic;
+        }
+        
+        .slider-preview {
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .slider-preview img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .btn-save {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #72bf44 0%, #5a9a35 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(114, 191, 68, 0.3);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: #72bf44;
+        }
+        
+        .notification.error {
+            background-color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎉 Конструктор поздравительной открытки</h1>
+        <div>
+            <a href="./index.html" class="btn btn-secondary">👁️ Просмотр</a>
+            <button class="btn btn-primary" onclick="saveCard()">💾 Сохранить</button>
+        </div>
+    </div>
+    
+    <div class="main">
+        <div class="settings">
+            <form id="cardForm">
+                <div class="section-title">📝 Основная информация</div>
+                
+                <div class="form-group">
+                    <label for="title">Заголовок открытки</label>
+                    <input type="text" id="title" class="form-control" placeholder="Например: С Днем Рождения!" value="Поздравление">
+                </div>
+                
+                <div class="form-group">
+                    <label for="event">Событие</label>
+                    <input type="text" id="event" class="form-control" placeholder="Например: День Рождения" value="День Рождения">
+                </div>
+                
+                <div class="section-title">👤 Персональные данные</div>
+                
+                <div class="form-group">
+                    <label for="recipientName">Имя получателя</label>
+                    <input type="text" id="recipientName" class="form-control" placeholder="Имя того, кого поздравляем" value="Вадюша">
+                </div>
+                
+                <div class="form-group">
+                    <label for="senderName">Имя отправителя</label>
+                    <input type="text" id="senderName" class="form-control" placeholder="Ваше имя" value="Араик">
+                </div>
+                
+                <div class="section-title">💌 Поздравления</div>
+                
+                <div class="form-group">
+                    <label for="wishes">Поздравления и пожелания</label>
+                    <textarea id="wishes" class="form-control" placeholder="Напишите красивые пожелания..." rows="4">Поздравляю с днем рождения!&#10;Желаю всего самого наилучшего!</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="personalMessage">Личное сообщение</label>
+                    <textarea id="personalMessage" class="form-control" placeholder="Добавьте личное сообщение..." rows="3">Я не опоздал - это ты рано родился</textarea>
+                </div>
+                
+                <div class="section-title">🖼️ Изображения</div>
+                
+                <div class="form-group">
+                    <label for="images">Фотографии для слайдера</label>
+                    <input type="file" id="images" class="form-control" multiple accept="image/*">
+                </div>
+                
+                <div class="form-group">
+                    <label for="qrCode">QR-код или сертификат</label>
+                    <input type="file" id="qrCode" class="form-control" accept="image/*">
+                </div>
+                
+                <button type="button" class="btn-save" onclick="saveCard()">
+                    💾 Сохранить открытку
+                </button>
+            </form>
+        </div>
+        
+        <div class="preview">
+            <div class="preview-container">
+                <div class="preview-header">
+                    <h2 id="previewTitle">Поздравление</h2>
+                </div>
+                
+                <div class="preview-content">
+                    <div class="preview-field">
+                        <label>Событие</label>
+                        <div class="value" id="previewEvent">День Рождения</div>
+                    </div>
+                    
+                    <div class="slider-preview" id="sliderPreview">
+                        <img src="./img/system/fot.gif" alt="Предварительный просмотр">
+                    </div>
+                    
+                    <div class="preview-field">
+                        <label>Получатель</label>
+                        <div class="value" id="previewRecipient">Вадюша</div>
+                    </div>
+                    
+                    <div class="preview-field">
+                        <label>Поздравления</label>
+                        <div class="value" id="previewWishes">Поздравляю с днем рождения!<br>Желаю всего самого наилучшего!</div>
+                    </div>
+                    
+                    <div class="preview-field">
+                        <label>Отправитель</label>
+                        <div class="value" id="previewSender">Араик</div>
+                    </div>
+                    
+                    <div class="preview-field">
+                        <label>Личное сообщение</label>
+                        <div class="value" id="previewMessage">Я не опоздал - это ты рано родился</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Глобальные переменные
+        let cardData = {
+            title: "Поздравление",
+            event: "День Рождения",
+            recipientName: "Вадюша",
+            wishes: "Поздравляю с днем рождения!\nЖелаю всего самого наилучшего!",
+            senderName: "Араик",
+            personalMessage: "Я не опоздал - это ты рано родился",
+            images: [],
+            qrCode: null
+        };
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            updatePreview();
+        });
+        
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Обработчики для текстовых полей
+            const textFields = ['title', 'event', 'recipientName', 'wishes', 'senderName', 'personalMessage'];
+            textFields.forEach(fieldId => {
+                document.getElementById(fieldId).addEventListener('input', function() {
+                    cardData[fieldId] = this.value;
+                    updatePreview();
+                });
+            });
+            
+            // Обработчик для изображений
+            document.getElementById('images').addEventListener('change', handleImageUpload);
+            
+            // Обработчик для QR-кода
+            document.getElementById('qrCode').addEventListener('change', handleQRUpload);
+        }
+        
+        // Обработка загрузки изображений
+        function handleImageUpload(event) {
+            const files = Array.from(event.target.files);
+            cardData.images = [];
+            
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        cardData.images.push(e.target.result);
+                        updateSliderPreview();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        
+        // Обработка загрузки QR-кода
+        function handleQRUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    cardData.qrCode = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // Обновление слайдера в предварительном просмотре
+        function updateSliderPreview() {
+            const sliderContainer = document.getElementById('sliderPreview');
+            const img = sliderContainer.querySelector('img');
+            
+            if (cardData.images.length > 0) {
+                img.src = cardData.images[0];
+            } else {
+                img.src = './img/system/fot.gif';
+            }
+        }
+        
+        // Обновление всего предварительного просмотра
+        function updatePreview() {
+            // Обновляем заголовок
+            document.getElementById('previewTitle').textContent = cardData.title || 'Поздравление';
+            
+            // Обновляем событие
+            document.getElementById('previewEvent').textContent = cardData.event || 'Событие';
+            document.getElementById('previewEvent').className = `value ${!cardData.event ? 'empty' : ''}`;
+            
+            // Обновляем получателя
+            document.getElementById('previewRecipient').textContent = cardData.recipientName || 'Имя получателя';
+            document.getElementById('previewRecipient').className = `value ${!cardData.recipientName ? 'empty' : ''}`;
+            
+            // Обновляем пожелания
+            document.getElementById('previewWishes').innerHTML = (cardData.wishes || 'Пожелания').replace(/\n/g, '<br>');
+            document.getElementById('previewWishes').className = `value ${!cardData.wishes ? 'empty' : ''}`;
+            
+            // Обновляем отправителя
+            document.getElementById('previewSender').textContent = cardData.senderName || 'Имя отправителя';
+            document.getElementById('previewSender').className = `value ${!cardData.senderName ? 'empty' : ''}`;
+            
+            // Обновляем личное сообщение
+            document.getElementById('previewMessage').textContent = cardData.personalMessage || 'Личное сообщение';
+            document.getElementById('previewMessage').className = `value ${!cardData.personalMessage ? 'empty' : ''}`;
+        }
+        
+        // Сохранение открытки
+        function saveCard() {
+            // Создаем объект с данными для сохранения
+            const saveData = {
+                title: cardData.title,
+                event: cardData.event,
+                recipientName: cardData.recipientName,
+                wishes: cardData.wishes.split('\n').filter(wish => wish.trim()),
+                senderName: cardData.senderName,
+                personalMessage: cardData.personalMessage,
+                images: cardData.images,
+                qrCode: cardData.qrCode,
+                pushPins: [{}, {}, {}, {}]
+            };
+            
+            // Сохраняем в localStorage
+            localStorage.setItem('cardData', JSON.stringify(saveData));
+            
+            // Показываем уведомление
+            showNotification('Открытка успешно сохранена!', 'success');
+            
+            // Обновляем основной файл setings.js
+            updateSettingsFile(saveData);
+        }
+        
+        // Обновление файла setings.js
+        function updateSettingsFile(data) {
+            // Создаем содержимое для файла
+            const fileContent = `const jsonData = ${JSON.stringify(data, null, 2)};`;
+            
+            // Создаем blob и скачиваем файл
+            const blob = new Blob([fileContent], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'setings.js';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Показ уведомлений
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Загрузка сохраненных данных при инициализации
+        function loadSavedData() {
+            const saved = localStorage.getItem('cardData');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    cardData = {
+                        title: data.title || '',
+                        event: data.event || '',
+                        recipientName: data.recipientName || '',
+                        wishes: Array.isArray(data.wishes) ? data.wishes.join('\n') : data.wishes || '',
+                        senderName: data.senderName || '',
+                        personalMessage: data.personalMessage || '',
+                        images: data.images || [],
+                        qrCode: data.qrCode || null
+                    };
+                    
+                    // Обновляем форму
+                    document.getElementById('title').value = cardData.title;
+                    document.getElementById('event').value = cardData.event;
+                    document.getElementById('recipientName').value = cardData.recipientName;
+                    document.getElementById('wishes').value = cardData.wishes;
+                    document.getElementById('senderName').value = cardData.senderName;
+                    document.getElementById('personalMessage').value = cardData.personalMessage;
+                    
+                    updatePreview();
+                    updateSliderPreview();
+                } catch (e) {
+                    console.error('Ошибка загрузки сохраненных данных:', e);
+                }
+            }
+        }
+        
+        // Загружаем сохраненные данные при загрузке страницы
+        window.addEventListener('load', loadSavedData);
+    </script>
+</body>
+</html>
