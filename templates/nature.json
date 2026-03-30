@@ -1,0 +1,19 @@
+{
+  "id": "nature",
+  "name": "Природа",
+  "colors": {
+    "primary": "#2e7d32",
+    "cardBg": "#f1f8e9",
+    "text": "#1b5e20",
+    "wishes": "#33691e"
+  },
+  "envelope": "classic",
+  "typography": {
+    "wishesSize": "16px",
+    "align": "center"
+  },
+  "layout": {
+    "showSlider": true,
+    "showQr": true
+  }
+}

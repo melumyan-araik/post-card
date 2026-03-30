@@ -60,6 +60,14 @@ const faviconB64  = readB64(path.join(IMG, 'favicon.ico'));
 const fotGifB64   = readB64(path.join(IMG, 'fot.gif'));
 const button2B64  = readB64(path.join(IMG, 'button2.png'));
 
+// ── Читаем шаблоны ─────────────────────────────────────────────────────────
+
+const TEMPLATES_DIR = path.join(ROOT, 'templates');
+const templates = fs.readdirSync(TEMPLATES_DIR)
+  .filter(f => f.endsWith('.json'))
+  .map(f => JSON.parse(read(path.join(TEMPLATES_DIR, f))));
+
+console.log(`Загружено шаблонов: ${templates.length}`);
 console.log('Исходники прочитаны. Генерирую admin.html...');
 
 // ── Шаблон HTML открытки (встраивается в iframe) ───────────────────────────
@@ -567,6 +575,46 @@ const adminHtml = `<!DOCTYPE html>
       margin-left: 4px;
     }
 
+    /* ── Выбор шаблона ── */
+    .section-title { margin-top: 8px; }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .template-card {
+      border: 2px solid #e2e6ee;
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      background: #fafbfd;
+    }
+    .template-card:hover { border-color: #4c75af; }
+    .template-card.active {
+      border-color: #0fc3ad;
+      box-shadow: 0 0 0 2px rgba(15,195,173,0.2);
+      background: #f0fdfb;
+    }
+    .template-swatch {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+    .template-swatch span {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-block;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+    .template-card .tpl-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1a2340;
+    }
+
     /* ── Тоггл анимации ── */
     .anim-toggle {
       display: inline-flex;
@@ -628,6 +676,9 @@ const adminHtml = `<!DOCTYPE html>
   <!-- ── Левая панель ── -->
   <div class="editor">
     <div class="editor-body">
+
+      <div class="section-title" style="margin-top:0">Шаблон</div>
+      <div class="template-grid" id="template-grid"></div>
 
       <div class="section-title">Основное</div>
 
@@ -716,6 +767,7 @@ const adminHtml = `<!DOCTYPE html>
 //  Встроенные ресурсы открытки (читаются build.js из исходников)
 // ══════════════════════════════════════════════════════════════════
 
+const TEMPLATES = ${JSON.stringify(templates, null, 2)};
 const NO_ANIM_CSS = \`${NO_ANIM_ESC}\`;
 const CARD_CSS   = \`${CSS_ESCAPED}\`;
 const STYLE_CSS  = \`${STYLE_ESCAPED}\`;
@@ -765,10 +817,41 @@ let state = {
 };
 
 // ══════════════════════════════════════════════════════════════════
+//  Шаблоны
+// ══════════════════════════════════════════════════════════════════
+
+function renderTemplates() {
+  const grid = document.getElementById('template-grid');
+  grid.innerHTML = '';
+  TEMPLATES.forEach(function(tpl) {
+    const card = document.createElement('div');
+    card.className = 'template-card' + (state.template && state.template.id === tpl.id ? ' active' : '');
+    card.onclick = function() { selectTemplate(tpl); };
+    const c = tpl.colors || {};
+    card.innerHTML =
+      '<div class="template-swatch">' +
+        '<span style="background:' + (c.primary || '#ccc') + '"></span>' +
+        '<span style="background:' + (c.cardBg  || '#fff') + '"></span>' +
+        '<span style="background:' + (c.wishes  || '#333') + '"></span>' +
+      '</div>' +
+      '<div class="tpl-name">' + tpl.name + '</div>';
+    grid.appendChild(card);
+  });
+}
+
+function selectTemplate(tpl) {
+  state.template = tpl;
+  renderTemplates();
+  scheduleUpdate();
+}
+
+// ══════════════════════════════════════════════════════════════════
 //  Инициализация форм
 // ══════════════════════════════════════════════════════════════════
 
 function init() {
+  state.template = TEMPLATES[0];
+  renderTemplates();
   renderWishes();
   scheduleUpdate();
 }
@@ -896,9 +979,36 @@ function collectState() {
 //  Генерация HTML открытки
 // ══════════════════════════════════════════════════════════════════
 
+function buildTemplateVars(tpl) {
+  if (!tpl) return '';
+  const c = tpl.colors || {};
+  const t = tpl.typography || {};
+  return ':root{' +
+    (c.primary    ? '--color-primary:' + c.primary + ';'   : '') +
+    (c.cardBg     ? '--card-bg:'       + c.cardBg  + ';'   : '') +
+    (c.text       ? '--text-color:'    + c.text    + ';'   : '') +
+    (c.wishes     ? '--wishes-color:'  + c.wishes  + ';'   : '') +
+    (t.wishesSize ? '--wishes-size:'   + t.wishesSize + ';': '') +
+    (t.align      ? '--text-align:'    + t.align   + ';'   : '') +
+  '}';
+}
+
+function buildLayoutCss(tpl) {
+  if (!tpl || !tpl.layout) return '';
+  const l = tpl.layout;
+  let css = '';
+  if (l.showSlider === false) css += '.sim-slider,.card-block{display:none!important;}';
+  if (l.showQr     === false) css += '#qr,.qr-code__tabs{display:none!important;}';
+  return css;
+}
+
 function generateCardHtml(skipAnim) {
-  const data = JSON.stringify(state, null, 2);
-  const extraCss = skipAnim ? NO_ANIM_CSS : '';
+  const data    = JSON.stringify(state, null, 2);
+  const tpl     = state.template || null;
+  const tplVars = buildTemplateVars(tpl);
+  const tplLayout = buildLayoutCss(tpl);
+  const envClass = tpl && tpl.envelope === 'dark' ? ' envelope-dark' : '';
+  const extraCss = tplVars + tplLayout + (skipAnim ? NO_ANIM_CSS : '');
   return '<!DOCTYPE html>\\n' +
     '<html lang="ru">\\n' +
     '<head>\\n' +
@@ -907,7 +1017,7 @@ function generateCardHtml(skipAnim) {
     '  <title>' + (state.title || 'Открытка') + '</title>\\n' +
     '  <style>\\n' + CARD_CSS + '\\n' + STYLE_CSS + '\\n' + extraCss + '\\n  </style>\\n' +
     '</head>\\n' +
-    '<body>\\n' +
+    '<body class="' + envClass.trim() + '">\\n' +
     CARD_BODY + '\\n' +
     '<script>const jsonData = ' + data + ';<\\/script>\\n' +
     '<script>' + JQUERY_JS + '<\\/script>\\n' +

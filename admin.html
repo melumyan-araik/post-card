@@ -296,6 +296,46 @@
       margin-left: 4px;
     }
 
+    /* ── Выбор шаблона ── */
+    .section-title { margin-top: 8px; }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .template-card {
+      border: 2px solid #e2e6ee;
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      background: #fafbfd;
+    }
+    .template-card:hover { border-color: #4c75af; }
+    .template-card.active {
+      border-color: #0fc3ad;
+      box-shadow: 0 0 0 2px rgba(15,195,173,0.2);
+      background: #f0fdfb;
+    }
+    .template-swatch {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+    .template-swatch span {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-block;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+    .template-card .tpl-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1a2340;
+    }
+
     /* ── Тоггл анимации ── */
     .anim-toggle {
       display: inline-flex;
@@ -357,6 +397,9 @@
   <!-- ── Левая панель ── -->
   <div class="editor">
     <div class="editor-body">
+
+      <div class="section-title" style="margin-top:0">Шаблон</div>
+      <div class="template-grid" id="template-grid"></div>
 
       <div class="section-title">Основное</div>
 
@@ -445,6 +488,84 @@
 //  Встроенные ресурсы открытки (читаются build.js из исходников)
 // ══════════════════════════════════════════════════════════════════
 
+const TEMPLATES = [
+  {
+    "id": "dark",
+    "name": "Ночной",
+    "colors": {
+      "primary": "#a78bfa",
+      "cardBg": "#1e1b2e",
+      "text": "#e2d9f3",
+      "wishes": "#c4b5fd"
+    },
+    "envelope": "dark",
+    "typography": {
+      "wishesSize": "16px",
+      "align": "center"
+    },
+    "layout": {
+      "showSlider": true,
+      "showQr": true
+    }
+  },
+  {
+    "id": "default",
+    "name": "Стандарт",
+    "colors": {
+      "primary": "#0fc3ad",
+      "cardBg": "#f1f3f8",
+      "text": "#1a2340",
+      "wishes": "#2c3e50"
+    },
+    "envelope": "classic",
+    "typography": {
+      "wishesSize": "16px",
+      "align": "center"
+    },
+    "layout": {
+      "showSlider": true,
+      "showQr": true
+    }
+  },
+  {
+    "id": "golden-apple",
+    "name": "Золотое Яблоко",
+    "colors": {
+      "primary": "#E91E8C",
+      "cardBg": "#fff5f9",
+      "text": "#1a1a1a",
+      "wishes": "#c0156e"
+    },
+    "envelope": "classic",
+    "typography": {
+      "wishesSize": "17px",
+      "align": "center"
+    },
+    "layout": {
+      "showSlider": true,
+      "showQr": true
+    }
+  },
+  {
+    "id": "nature",
+    "name": "Природа",
+    "colors": {
+      "primary": "#2e7d32",
+      "cardBg": "#f1f8e9",
+      "text": "#1b5e20",
+      "wishes": "#33691e"
+    },
+    "envelope": "classic",
+    "typography": {
+      "wishesSize": "16px",
+      "align": "center"
+    },
+    "layout": {
+      "showSlider": true,
+      "showQr": true
+    }
+  }
+];
 const NO_ANIM_CSS = `
 /* ── edit-mode: skip envelope animation ── */
 .animation-block.hide { display: block !important; }
@@ -4237,20 +4358,59 @@ a[href^="tel"] {
 `;
 const STYLE_CSS  = `/* style.css */
 
-/* Общие стили */
+/* ── CSS-переменные (управляются шаблоном) ── */
+:root {
+    --color-primary: #0fc3ad;
+    --card-bg:       #f1f3f8;
+    --text-color:    #1a2340;
+    --wishes-color:  #2c3e50;
+    --wishes-size:   16px;
+    --text-align:    center;
+}
+
+/* ── Общие стили ── */
 .gift_card_price,
 .qr-btn,
 .qr-code__tabs__elem__submit {
-    background-color: #0fc3ad;
+    background-color: var(--color-primary);
 }
 .qr-code__tabs a.digift-site,
 a.link {
-    color: #0fc3ad;
+    color: var(--color-primary);
 }
 .phone-block__input:focus,
 .phone-block input[type="tel"]:focus {
     border-width: 2px;
-    border-color: #0fc3ad;
+    border-color: var(--color-primary);
+}
+
+/* ── Цвет фона карточки ── */
+.gift-card {
+    background-color: var(--card-bg) !important;
+}
+
+/* ── Цвет и размер текста поздравления ── */
+#wishes {
+    color: var(--wishes-color);
+    font-size: var(--wishes-size);
+    text-align: var(--text-align);
+}
+#recipientName, #senderName, #event {
+    color: var(--text-color);
+    text-align: var(--text-align);
+}
+#personalMessage {
+    color: var(--text-color);
+}
+
+/* ── Конверт: тёмная тема ── */
+.envelope-dark #envelope-back {
+    background-color: #1e1b2e !important;
+    border-color: #3d3560 !important;
+}
+.envelope-dark .envelope-flap {
+    background-color: #1e1b2e !important;
+    border-color: #3d3560 !important;
 }
 .card-block {
     background: url('data:image/svg+xml;utf8,<svg width="618px" height="315px" viewBox="0 0 618 315" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">...</svg>') top no-repeat;
@@ -5505,10 +5665,41 @@ let state = {
 };
 
 // ══════════════════════════════════════════════════════════════════
+//  Шаблоны
+// ══════════════════════════════════════════════════════════════════
+
+function renderTemplates() {
+  const grid = document.getElementById('template-grid');
+  grid.innerHTML = '';
+  TEMPLATES.forEach(function(tpl) {
+    const card = document.createElement('div');
+    card.className = 'template-card' + (state.template && state.template.id === tpl.id ? ' active' : '');
+    card.onclick = function() { selectTemplate(tpl); };
+    const c = tpl.colors || {};
+    card.innerHTML =
+      '<div class="template-swatch">' +
+        '<span style="background:' + (c.primary || '#ccc') + '"></span>' +
+        '<span style="background:' + (c.cardBg  || '#fff') + '"></span>' +
+        '<span style="background:' + (c.wishes  || '#333') + '"></span>' +
+      '</div>' +
+      '<div class="tpl-name">' + tpl.name + '</div>';
+    grid.appendChild(card);
+  });
+}
+
+function selectTemplate(tpl) {
+  state.template = tpl;
+  renderTemplates();
+  scheduleUpdate();
+}
+
+// ══════════════════════════════════════════════════════════════════
 //  Инициализация форм
 // ══════════════════════════════════════════════════════════════════
 
 function init() {
+  state.template = TEMPLATES[0];
+  renderTemplates();
   renderWishes();
   scheduleUpdate();
 }
@@ -5636,9 +5827,36 @@ function collectState() {
 //  Генерация HTML открытки
 // ══════════════════════════════════════════════════════════════════
 
+function buildTemplateVars(tpl) {
+  if (!tpl) return '';
+  const c = tpl.colors || {};
+  const t = tpl.typography || {};
+  return ':root{' +
+    (c.primary    ? '--color-primary:' + c.primary + ';'   : '') +
+    (c.cardBg     ? '--card-bg:'       + c.cardBg  + ';'   : '') +
+    (c.text       ? '--text-color:'    + c.text    + ';'   : '') +
+    (c.wishes     ? '--wishes-color:'  + c.wishes  + ';'   : '') +
+    (t.wishesSize ? '--wishes-size:'   + t.wishesSize + ';': '') +
+    (t.align      ? '--text-align:'    + t.align   + ';'   : '') +
+  '}';
+}
+
+function buildLayoutCss(tpl) {
+  if (!tpl || !tpl.layout) return '';
+  const l = tpl.layout;
+  let css = '';
+  if (l.showSlider === false) css += '.sim-slider,.card-block{display:none!important;}';
+  if (l.showQr     === false) css += '#qr,.qr-code__tabs{display:none!important;}';
+  return css;
+}
+
 function generateCardHtml(skipAnim) {
-  const data = JSON.stringify(state, null, 2);
-  const extraCss = skipAnim ? NO_ANIM_CSS : '';
+  const data    = JSON.stringify(state, null, 2);
+  const tpl     = state.template || null;
+  const tplVars = buildTemplateVars(tpl);
+  const tplLayout = buildLayoutCss(tpl);
+  const envClass = tpl && tpl.envelope === 'dark' ? ' envelope-dark' : '';
+  const extraCss = tplVars + tplLayout + (skipAnim ? NO_ANIM_CSS : '');
   return '<!DOCTYPE html>\n' +
     '<html lang="ru">\n' +
     '<head>\n' +
@@ -5647,7 +5865,7 @@ function generateCardHtml(skipAnim) {
     '  <title>' + (state.title || 'Открытка') + '</title>\n' +
     '  <style>\n' + CARD_CSS + '\n' + STYLE_CSS + '\n' + extraCss + '\n  </style>\n' +
     '</head>\n' +
-    '<body>\n' +
+    '<body class="' + envClass.trim() + '">\n' +
     CARD_BODY + '\n' +
     '<script>const jsonData = ' + data + ';<\/script>\n' +
     '<script>' + JQUERY_JS + '<\/script>\n' +

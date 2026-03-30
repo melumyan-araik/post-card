@@ -1,19 +1,58 @@
 /* style.css */
 
-/* Общие стили */
+/* ── CSS-переменные (управляются шаблоном) ── */
+:root {
+    --color-primary: #0fc3ad;
+    --card-bg:       #f1f3f8;
+    --text-color:    #1a2340;
+    --wishes-color:  #2c3e50;
+    --wishes-size:   16px;
+    --text-align:    center;
+}
+
+/* ── Общие стили ── */
 .gift_card_price,
 .qr-btn,
 .qr-code__tabs__elem__submit {
-    background-color: #0fc3ad;
+    background-color: var(--color-primary);
 }
 .qr-code__tabs a.digift-site,
 a.link {
-    color: #0fc3ad;
+    color: var(--color-primary);
 }
 .phone-block__input:focus,
 .phone-block input[type="tel"]:focus {
     border-width: 2px;
-    border-color: #0fc3ad;
+    border-color: var(--color-primary);
+}
+
+/* ── Цвет фона карточки ── */
+.gift-card {
+    background-color: var(--card-bg) !important;
+}
+
+/* ── Цвет и размер текста поздравления ── */
+#wishes {
+    color: var(--wishes-color);
+    font-size: var(--wishes-size);
+    text-align: var(--text-align);
+}
+#recipientName, #senderName, #event {
+    color: var(--text-color);
+    text-align: var(--text-align);
+}
+#personalMessage {
+    color: var(--text-color);
+}
+
+/* ── Конверт: тёмная тема ── */
+.envelope-dark #envelope-back {
+    background-color: #1e1b2e !important;
+    border-color: #3d3560 !important;
+}
+.envelope-dark .envelope-flap {
+    background-color: #1e1b2e !important;
+    border-color: #3d3560 !important;
 }
 .card-block {
     background: url('data:image/svg+xml;utf8,<svg width="618px" height="315px" viewBox="0 0 618 315" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">...</svg>') top no-repeat;

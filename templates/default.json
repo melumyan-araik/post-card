@@ -1,0 +1,19 @@
+{
+  "id": "default",
+  "name": "Стандарт",
+  "colors": {
+    "primary": "#0fc3ad",
+    "cardBg": "#f1f3f8",
+    "text": "#1a2340",
+    "wishes": "#2c3e50"
+  },
+  "envelope": "classic",
+  "typography": {
+    "wishesSize": "16px",
+    "align": "center"
+  },
+  "layout": {
+    "showSlider": true,
+    "showQr": true
+  }
+}
