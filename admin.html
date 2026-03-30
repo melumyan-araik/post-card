@@ -6059,8 +6059,14 @@ function buildTemplateVars(tpl, overrides) {
 function buildLayoutCss(tpl, overrides) {
   const l = Object.assign({}, (tpl && tpl.layout) || {}, (overrides && overrides.layout) || {});
   let css = '';
-  if (l.showSlider === false) css += '.sim-slider,.card-block{display:none!important;}';
-  if (l.showQr     === false) css += '#qr,.qr-code__tabs{display:none!important;}';
+  if (l.showSlider === false) css +=
+    '.sim-slider,.card-block,.header{display:none!important;}' +
+    '.qr-code{padding-top:24px!important;}' +
+    '.qr-col-info-flex{width:100%!important;max-width:100%!important;flex:1!important;}' +
+    '.row-flex{justify-content:center!important;}' +
+    '.mail-text,.mail-text__container,.mail-text__grats{text-align:center!important;width:100%!important;}' +
+    '#wishes,#recipientName,#senderName,#personalMessage,#event{text-align:center!important;}';
+  if (l.showQr     === false) css += '#qr,.qr-code__tabs,.qr-col-info-flex-wrap{display:none!important;}';
   return css;
 }
 
