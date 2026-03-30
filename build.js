@@ -615,6 +615,104 @@ const adminHtml = `<!DOCTYPE html>
       color: #1a2340;
     }
 
+    /* ── Панель кастомизации ── */
+    .custom-panel {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.3s ease;
+    }
+    .custom-panel.open { max-height: 600px; }
+
+    .custom-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .custom-header .chevron {
+      font-size: 12px;
+      color: #8899bb;
+      transition: transform 0.2s;
+    }
+    .custom-header.open .chevron { transform: rotate(180deg); }
+
+    .color-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .color-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #5a6480;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .color-swatch-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #dde2ee;
+      border-radius: 6px;
+      padding: 5px 8px;
+      background: #fafbfd;
+      cursor: pointer;
+    }
+    .color-swatch-wrap:hover { border-color: #4c75af; }
+    .color-swatch-wrap input[type="color"] {
+      width: 0; height: 0; opacity: 0; position: absolute; pointer-events: none;
+    }
+    .color-dot {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+    .color-hex {
+      font-size: 12px;
+      font-family: monospace;
+      color: #5a6480;
+    }
+
+    .layout-toggles { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+    .layout-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #3a4460;
+    }
+    .toggle-switch {
+      position: relative; width: 36px; height: 20px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-switch .slider {
+      position: absolute; inset: 0;
+      background: #dde2ee; border-radius: 20px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .toggle-switch .slider::before {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      left: 3px; top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle-switch input:checked + .slider { background: #0fc3ad; }
+    .toggle-switch input:checked + .slider::before { transform: translateX(16px); }
+
+    .reset-link {
+      font-size: 11px; color: #8899bb; cursor: pointer;
+      text-decoration: underline; display: block; text-align: right; margin-top: 8px;
+    }
+    .reset-link:hover { color: #4c75af; }
+
     /* ── Тоггл анимации ── */
     .anim-toggle {
       display: inline-flex;
@@ -679,6 +777,65 @@ const adminHtml = `<!DOCTYPE html>
 
       <div class="section-title" style="margin-top:0">Шаблон</div>
       <div class="template-grid" id="template-grid"></div>
+
+      <div class="section-title custom-header" id="custom-header" onclick="toggleCustomPanel()">
+        Кастомизация
+        <span class="chevron">&#9650;</span>
+      </div>
+      <div class="custom-panel open" id="custom-panel">
+        <div class="color-row">
+          <div class="color-field">
+            <label>Акцент</label>
+            <div class="color-swatch-wrap" onclick="document.getElementById('cp-primary').click()">
+              <input type="color" id="cp-primary" oninput="setOverrideColor('primary', this.value)">
+              <div class="color-dot" id="dot-primary"></div>
+              <span class="color-hex" id="hex-primary">#000000</span>
+            </div>
+          </div>
+          <div class="color-field">
+            <label>Фон карточки</label>
+            <div class="color-swatch-wrap" onclick="document.getElementById('cp-cardbg').click()">
+              <input type="color" id="cp-cardbg" oninput="setOverrideColor('cardBg', this.value)">
+              <div class="color-dot" id="dot-cardbg"></div>
+              <span class="color-hex" id="hex-cardbg">#000000</span>
+            </div>
+          </div>
+          <div class="color-field">
+            <label>Пожелания</label>
+            <div class="color-swatch-wrap" onclick="document.getElementById('cp-wishes').click()">
+              <input type="color" id="cp-wishes" oninput="setOverrideColor('wishes', this.value)">
+              <div class="color-dot" id="dot-wishes"></div>
+              <span class="color-hex" id="hex-wishes">#000000</span>
+            </div>
+          </div>
+          <div class="color-field">
+            <label>Текст</label>
+            <div class="color-swatch-wrap" onclick="document.getElementById('cp-text').click()">
+              <input type="color" id="cp-text" oninput="setOverrideColor('text', this.value)">
+              <div class="color-dot" id="dot-text"></div>
+              <span class="color-hex" id="hex-text">#000000</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="layout-toggles">
+          <div class="layout-row">
+            <span>Слайдер фотографий</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="lt-slider" checked onchange="setOverrideLayout('showSlider', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="layout-row">
+            <span>QR-код / Сертификат</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="lt-qr" checked onchange="setOverrideLayout('showQr', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+        <span class="reset-link" onclick="resetOverrides()">Сбросить к шаблону</span>
+      </div>
 
       <div class="section-title">Основное</div>
 
@@ -841,8 +998,65 @@ function renderTemplates() {
 
 function selectTemplate(tpl) {
   state.template = tpl;
+  state.overrides = { colors: {}, layout: {} };
   renderTemplates();
+  syncCustomPanel();
   scheduleUpdate();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  Кастомизация (оверрайды поверх шаблона)
+// ══════════════════════════════════════════════════════════════════
+
+function syncCustomPanel() {
+  const tpl = state.template || {};
+  const c = Object.assign({}, tpl.colors || {}, (state.overrides && state.overrides.colors) || {});
+  const l = Object.assign({}, tpl.layout || {}, (state.overrides && state.overrides.layout) || {});
+
+  setColorPicker('primary', c.primary || '#0fc3ad');
+  setColorPicker('cardbg',  c.cardBg  || '#f1f3f8');
+  setColorPicker('wishes',  c.wishes  || '#2c3e50');
+  setColorPicker('text',    c.text    || '#1a2340');
+
+  const sliderEl = document.getElementById('lt-slider');
+  const qrEl     = document.getElementById('lt-qr');
+  if (sliderEl) sliderEl.checked = l.showSlider !== false;
+  if (qrEl)     qrEl.checked     = l.showQr     !== false;
+}
+
+function setColorPicker(key, hex) {
+  const input = document.getElementById('cp-' + key);
+  const dot   = document.getElementById('dot-' + key);
+  const label = document.getElementById('hex-' + key);
+  if (input) input.value = hex;
+  if (dot)   dot.style.background = hex;
+  if (label) label.textContent = hex;
+}
+
+function setOverrideColor(key, hex) {
+  if (!state.overrides) state.overrides = { colors: {}, layout: {} };
+  state.overrides.colors[key] = hex;
+  setColorPicker(key === 'cardBg' ? 'cardbg' : key, hex);
+  scheduleUpdate();
+}
+
+function setOverrideLayout(key, val) {
+  if (!state.overrides) state.overrides = { colors: {}, layout: {} };
+  state.overrides.layout[key] = val;
+  scheduleUpdate();
+}
+
+function resetOverrides() {
+  state.overrides = { colors: {}, layout: {} };
+  syncCustomPanel();
+  scheduleUpdate();
+}
+
+function toggleCustomPanel() {
+  const panel  = document.getElementById('custom-panel');
+  const header = document.getElementById('custom-header');
+  panel.classList.toggle('open');
+  header.classList.toggle('open');
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -850,8 +1064,10 @@ function selectTemplate(tpl) {
 // ══════════════════════════════════════════════════════════════════
 
 function init() {
-  state.template = TEMPLATES[0];
+  state.template  = TEMPLATES[0];
+  state.overrides = { colors: {}, layout: {} };
   renderTemplates();
+  syncCustomPanel();
   renderWishes();
   scheduleUpdate();
 }
@@ -979,10 +1195,9 @@ function collectState() {
 //  Генерация HTML открытки
 // ══════════════════════════════════════════════════════════════════
 
-function buildTemplateVars(tpl) {
-  if (!tpl) return '';
-  const c = tpl.colors || {};
-  const t = tpl.typography || {};
+function buildTemplateVars(tpl, overrides) {
+  const c = Object.assign({}, (tpl && tpl.colors) || {}, (overrides && overrides.colors) || {});
+  const t = (tpl && tpl.typography) || {};
   return ':root{' +
     (c.primary    ? '--color-primary:' + c.primary + ';'   : '') +
     (c.cardBg     ? '--card-bg:'       + c.cardBg  + ';'   : '') +
@@ -993,9 +1208,8 @@ function buildTemplateVars(tpl) {
   '}';
 }
 
-function buildLayoutCss(tpl) {
-  if (!tpl || !tpl.layout) return '';
-  const l = tpl.layout;
+function buildLayoutCss(tpl, overrides) {
+  const l = Object.assign({}, (tpl && tpl.layout) || {}, (overrides && overrides.layout) || {});
   let css = '';
   if (l.showSlider === false) css += '.sim-slider,.card-block{display:none!important;}';
   if (l.showQr     === false) css += '#qr,.qr-code__tabs{display:none!important;}';
@@ -1004,10 +1218,13 @@ function buildLayoutCss(tpl) {
 
 function generateCardHtml(skipAnim) {
   const data    = JSON.stringify(state, null, 2);
-  const tpl     = state.template || null;
-  const tplVars = buildTemplateVars(tpl);
-  const tplLayout = buildLayoutCss(tpl);
-  const envClass = tpl && tpl.envelope === 'dark' ? ' envelope-dark' : '';
+  const tpl     = state.template  || null;
+  const ov      = state.overrides || {};
+  const tplVars   = buildTemplateVars(tpl, ov);
+  const tplLayout = buildLayoutCss(tpl, ov);
+  const envColor  = (ov.colors && ov.colors.primary) || (tpl && tpl.colors && tpl.colors.primary) || '';
+  const isDark    = (tpl && tpl.envelope === 'dark');
+  const envClass  = isDark ? 'envelope-dark' : '';
   const extraCss = tplVars + tplLayout + (skipAnim ? NO_ANIM_CSS : '');
   return '<!DOCTYPE html>\\n' +
     '<html lang="ru">\\n' +
