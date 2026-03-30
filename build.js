@@ -198,6 +198,20 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 `;
 
+// ── CSS для режима «без анимации» (показывает содержимое сразу) ────────────
+
+const NO_ANIM_CSS = `
+/* ── edit-mode: skip envelope animation ── */
+.animation-block.hide { display: block !important; }
+.animation-block { animation: none !important; transition: none !important; opacity: 1 !important; }
+.bounceInLeft, .animated { animation: none !important; }
+.envelop-rotate { display: none !important; }
+.envelope-flaps { display: none !important; }
+#envelope-back  { top: 0 !important; background: none !important; border: none !important; box-shadow: none !important; }
+#gift-card      { top: 0 !important; overflow: visible !important; z-index: 4 !important; position: relative !important; }
+.gift-card-block { display: block !important; }
+`;
+
 // ── Функция генерации HTML открытки ───────────────────────────────────────
 
 function makeCardHtml(jsonDataStr) {
@@ -243,6 +257,7 @@ const DEFAULT_DATA = {
 // ── Генерируем admin.html ──────────────────────────────────────────────────
 
 // Для вставки в JS-строки внутри admin.html используем escape
+const NO_ANIM_ESC    = escape(NO_ANIM_CSS);
 const CSS_ESCAPED    = escape(cardCss);
 const STYLE_ESCAPED  = escape(styleCss);
 const JQUERY_ESC     = escape(jqueryJs);
@@ -526,21 +541,20 @@ const adminHtml = `<!DOCTYPE html>
 
     .preview-frame-wrap {
       flex: 1;
-      overflow: auto;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 24px;
+      overflow: hidden;
+      padding: 16px;
+      position: relative;
     }
 
     #preview-iframe {
-      width: 900px;
-      height: 700px;
+      width: 800px;
+      height: 680px;
       border: none;
       border-radius: 8px;
-      box-shadow: 0 4px 32px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 32px rgba(0,0,0,0.18);
       background: #fff;
-      flex-shrink: 0;
+      transform-origin: top left;
+      position: absolute;
     }
 
     .count-badge {
@@ -552,6 +566,36 @@ const adminHtml = `<!DOCTYPE html>
       padding: 1px 7px;
       margin-left: 4px;
     }
+
+    /* ── Тоггл анимации ── */
+    .anim-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1.5px solid #c8d6ee;
+      background: #f0f4fb;
+      color: #4c75af;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .anim-toggle:hover { background: #e0eaf8; }
+    .anim-toggle.active {
+      background: #1a2340;
+      border-color: #1a2340;
+      color: #fff;
+    }
+    .anim-toggle .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #4c75af;
+      transition: background 0.2s;
+    }
+    .anim-toggle.active .dot { background: #0fc3ad; }
 
     /* ── Сообщение об успехе ── */
     .toast {
@@ -653,6 +697,10 @@ const adminHtml = `<!DOCTYPE html>
     <div class="preview-toolbar">
       <span>Предпросмотр</span>
       <span class="preview-badge">Live</span>
+      <button class="anim-toggle" id="anim-toggle-btn" onclick="toggleAnimation()" title="Включить/выключить анимацию конверта">
+        <span class="dot"></span>
+        <span id="anim-toggle-label">Анимация выкл.</span>
+      </button>
     </div>
     <div class="preview-frame-wrap">
       <iframe id="preview-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
@@ -668,6 +716,7 @@ const adminHtml = `<!DOCTYPE html>
 //  Встроенные ресурсы открытки (читаются build.js из исходников)
 // ══════════════════════════════════════════════════════════════════
 
+const NO_ANIM_CSS = \`${NO_ANIM_ESC}\`;
 const CARD_CSS   = \`${CSS_ESCAPED}\`;
 const STYLE_CSS  = \`${STYLE_ESCAPED}\`;
 const JQUERY_JS  = \`${JQUERY_ESC}\`;
@@ -678,6 +727,26 @@ const SIM_JS     = \`${SIM_ESC}\`;
 const LOADER_JS  = \`${LOADER_ESC}\`;
 const PARTNER_JS = \`${PARTNER_ESC}\`;
 const CARD_BODY  = \`${BODY_ESC}\`;
+
+// ══════════════════════════════════════════════════════════════════
+//  Режим анимации (false = без анимации, сразу видно содержимое)
+// ══════════════════════════════════════════════════════════════════
+
+let animationMode = false;
+
+function toggleAnimation() {
+  animationMode = !animationMode;
+  const btn   = document.getElementById('anim-toggle-btn');
+  const label = document.getElementById('anim-toggle-label');
+  if (animationMode) {
+    btn.classList.add('active');
+    label.textContent = 'Анимация вкл.';
+  } else {
+    btn.classList.remove('active');
+    label.textContent = 'Анимация выкл.';
+  }
+  updatePreview();
+}
 
 // ══════════════════════════════════════════════════════════════════
 //  Состояние редактора
@@ -827,15 +896,16 @@ function collectState() {
 //  Генерация HTML открытки
 // ══════════════════════════════════════════════════════════════════
 
-function generateCardHtml() {
+function generateCardHtml(skipAnim) {
   const data = JSON.stringify(state, null, 2);
+  const extraCss = skipAnim ? NO_ANIM_CSS : '';
   return '<!DOCTYPE html>\\n' +
     '<html lang="ru">\\n' +
     '<head>\\n' +
     '  <meta charset="UTF-8">\\n' +
     '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\\n' +
     '  <title>' + (state.title || 'Открытка') + '</title>\\n' +
-    '  <style>\\n' + CARD_CSS + '\\n' + STYLE_CSS + '\\n  </style>\\n' +
+    '  <style>\\n' + CARD_CSS + '\\n' + STYLE_CSS + '\\n' + extraCss + '\\n  </style>\\n' +
     '</head>\\n' +
     '<body>\\n' +
     CARD_BODY + '\\n' +
@@ -863,7 +933,8 @@ function scheduleUpdate() {
 }
 
 function updatePreview() {
-  const html = generateCardHtml();
+  // skipAnim = true когда анимация ВЫКЛЮЧЕНА (режим редактирования)
+  const html = generateCardHtml(!animationMode);
   const iframe = document.getElementById('preview-iframe');
   iframe.srcdoc = html;
 }
@@ -874,7 +945,8 @@ function updatePreview() {
 
 function exportCard() {
   collectState();
-  const html = generateCardHtml();
+  // Экспорт всегда с анимацией (skipAnim = false)
+  const html = generateCardHtml(false);
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
@@ -902,10 +974,29 @@ function escAttr(str) {
 }
 
 // ══════════════════════════════════════════════════════════════════
+//  Масштабирование превью
+// ══════════════════════════════════════════════════════════════════
+
+function scalePreview() {
+  const wrap   = document.querySelector('.preview-frame-wrap');
+  const iframe = document.getElementById('preview-iframe');
+  const IFRAME_W = 800, IFRAME_H = 680;
+  const availW = wrap.offsetWidth  - 32;
+  const availH = wrap.offsetHeight - 32;
+  const scale  = Math.min(availW / IFRAME_W, availH / IFRAME_H, 1);
+  iframe.style.transform = 'scale(' + scale + ')';
+  iframe.style.left = (16 + (availW - IFRAME_W * scale) / 2) + 'px';
+  iframe.style.top  = '16px';
+}
+
+window.addEventListener('resize', scalePreview);
+
+// ══════════════════════════════════════════════════════════════════
 //  Запуск
 // ══════════════════════════════════════════════════════════════════
 
 init();
+scalePreview();
 </script>
 
 </body>
