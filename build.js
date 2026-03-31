@@ -56,8 +56,6 @@ const partnerJs   = read(path.join(JS_DIR, 'partner_card.js@v=1614772361'));
 
 // Значки (system images) → base64
 const IMG = path.join(POSTCARD, 'img', 'system');
-const faviconB64  = readB64(path.join(IMG, 'favicon.ico'));
-const fotGifB64   = readB64(path.join(IMG, 'fot.gif'));
 const button2B64  = readB64(path.join(IMG, 'button2.png'));
 
 // ── Читаем шаблоны ─────────────────────────────────────────────────────────
