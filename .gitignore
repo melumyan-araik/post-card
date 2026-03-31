@@ -34,3 +34,6 @@ build/
 
 # Кэш браузеров
 .cache/
+
+# Claude worktrees
+.claude/worktrees/
