@@ -7,7 +7,12 @@
     "text": "#e2d9f3",
     "wishes": "#c4b5fd"
   },
-  "envelope": "dark",
+  "envelope": {
+    "animation": "fade-scale",
+    "color": "#1e1b2e",
+    "flapColor": "#3d3560",
+    "theme": "dark"
+  },
   "typography": {
     "wishesSize": "16px",
     "align": "center"

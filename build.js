@@ -188,7 +188,12 @@ document.addEventListener("DOMContentLoaded", function() {
   if (jsonData.qrCode && qrEl) {
     const img = document.createElement('img');
     img.src = jsonData.qrCode;
-    img.style.maxWidth = '100px';
+    img.style.maxWidth = '380px';
+    img.style.width = '100%';
+    img.style.height = 'auto';
+    img.style.display = 'block';
+    img.style.margin = '12px auto';
+    img.style.borderRadius = '8px';
     qrEl.appendChild(img);
   }
 
@@ -621,7 +626,7 @@ const adminHtml = `<!DOCTYPE html>
       max-height: 0;
       transition: max-height 0.3s ease;
     }
-    .custom-panel.open { max-height: 600px; }
+    .custom-panel.open { max-height: 1200px; }
 
     .custom-header {
       display: flex;
@@ -834,6 +839,46 @@ const adminHtml = `<!DOCTYPE html>
             </label>
           </div>
         </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f0f2f5">
+          <label style="display:block;font-size:11px;font-weight:600;color:#5a6480;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Конверт</label>
+          <div style="margin-bottom:10px">
+            <label style="display:block;font-size:11px;color:#5a6480;margin-bottom:4px">Анимация входа</label>
+            <select id="env-anim" onchange="setOverrideEnvelope('animation', this.value)" style="width:100%;padding:7px 10px;border:1px solid #dde2ee;border-radius:6px;font-size:13px;background:#fafbfd;outline:none;cursor:pointer">
+              <option value="drop">Падение сверху</option>
+              <option value="slide-left">Влёт слева</option>
+              <option value="slide-right">Влёт справа</option>
+              <option value="fade-scale">Плавное появление</option>
+              <option value="slide-up">Выезд снизу</option>
+            </select>
+          </div>
+          <div class="color-row">
+            <div class="color-field">
+              <label>Цвет конверта</label>
+              <div class="color-swatch-wrap" onclick="document.getElementById('cp-envcolor').click()">
+                <input type="color" id="cp-envcolor" oninput="setOverrideEnvelope('color', this.value)">
+                <div class="color-dot" id="dot-envcolor"></div>
+                <span class="color-hex" id="hex-envcolor">#ffffff</span>
+              </div>
+            </div>
+            <div class="color-field">
+              <label>Цвет клапанов</label>
+              <div class="color-swatch-wrap" onclick="document.getElementById('cp-envflap').click()">
+                <input type="color" id="cp-envflap" oninput="setOverrideEnvelope('flapColor', this.value)">
+                <div class="color-dot" id="dot-envflap"></div>
+                <span class="color-hex" id="hex-envflap">#f0f0f0</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="display:block;font-size:11px;font-weight:600;color:#5a6480;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Печать (сургуч)</label>
+            <div class="upload-zone" onclick="document.getElementById('f-seal').click()" style="padding:10px">
+              <input type="file" id="f-seal" accept="image/*" onchange="handleSealImage(this)">
+              <span style="font-size:20px;display:block;margin-bottom:2px">&#128274;</span>
+              Загрузить изображение печати
+            </div>
+            <div id="seal-preview-area"></div>
+          </div>
+        </div>
         <span class="reset-link" onclick="resetOverrides()">Сбросить к шаблону</span>
       </div>
 
@@ -998,7 +1043,7 @@ function renderTemplates() {
 
 function selectTemplate(tpl) {
   state.template = tpl;
-  state.overrides = { colors: {}, layout: {} };
+  state.overrides = { colors: {}, layout: {}, envelope: {} };
   renderTemplates();
   syncCustomPanel();
   scheduleUpdate();
@@ -1012,11 +1057,23 @@ function syncCustomPanel() {
   const tpl = state.template || {};
   const c = Object.assign({}, tpl.colors || {}, (state.overrides && state.overrides.colors) || {});
   const l = Object.assign({}, tpl.layout || {}, (state.overrides && state.overrides.layout) || {});
+  const env = Object.assign({}, normalizeEnvelope(tpl.envelope), (state.overrides && state.overrides.envelope) || {});
 
   setColorPicker('primary', c.primary || '#0fc3ad');
   setColorPicker('cardbg',  c.cardBg  || '#f1f3f8');
   setColorPicker('wishes',  c.wishes  || '#2c3e50');
   setColorPicker('text',    c.text    || '#1a2340');
+
+  // Envelope colors
+  setColorPicker('envcolor',  env.color     || '#ffffff');
+  setColorPicker('envflap',   env.flapColor || '#f0f0f0');
+
+  // Envelope animation select
+  const animSelect = document.getElementById('env-anim');
+  if (animSelect) animSelect.value = env.animation || 'drop';
+
+  // Seal preview
+  renderSealPreview();
 
   const sliderEl = document.getElementById('lt-slider');
   const qrEl     = document.getElementById('lt-qr');
@@ -1047,9 +1104,48 @@ function setOverrideLayout(key, val) {
 }
 
 function resetOverrides() {
-  state.overrides = { colors: {}, layout: {} };
+  state.overrides = { colors: {}, layout: {}, envelope: {} };
   syncCustomPanel();
   scheduleUpdate();
+}
+
+function setOverrideEnvelope(key, val) {
+  if (!state.overrides) state.overrides = { colors: {}, layout: {}, envelope: {} };
+  if (!state.overrides.envelope) state.overrides.envelope = {};
+  state.overrides.envelope[key] = val;
+  if (key === 'color') setColorPicker('envcolor', val);
+  if (key === 'flapColor') setColorPicker('envflap', val);
+  scheduleUpdate();
+}
+
+function handleSealImage(input) {
+  if (!input.files.length) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    setOverrideEnvelope('sealImage', e.target.result);
+    renderSealPreview();
+  };
+  reader.readAsDataURL(input.files[0]);
+  input.value = '';
+}
+
+function removeSeal() {
+  if (state.overrides && state.overrides.envelope) {
+    delete state.overrides.envelope.sealImage;
+  }
+  renderSealPreview();
+  scheduleUpdate();
+}
+
+function renderSealPreview() {
+  var area = document.getElementById('seal-preview-area');
+  if (!area) return;
+  var env = Object.assign({}, normalizeEnvelope(state.template && state.template.envelope), (state.overrides && state.overrides.envelope) || {});
+  if (env.sealImage) {
+    area.innerHTML = '<div class="qr-preview"><img src="' + env.sealImage + '"><span class="qr-del" onclick="removeSeal()">Удалить</span></div>';
+  } else {
+    area.innerHTML = '';
+  }
 }
 
 function toggleCustomPanel() {
@@ -1065,7 +1161,7 @@ function toggleCustomPanel() {
 
 function init() {
   state.template  = TEMPLATES[0];
-  state.overrides = { colors: {}, layout: {} };
+  state.overrides = { colors: {}, layout: {}, envelope: {} };
   renderTemplates();
   syncCustomPanel();
   renderWishes();
@@ -1222,16 +1318,64 @@ function buildLayoutCss(tpl, overrides) {
   return css;
 }
 
+function normalizeEnvelope(e) {
+  if (!e) return {};
+  if (typeof e === 'string') return { theme: e, animation: 'drop' };
+  return e;
+}
+
+function buildEnvelopeCss(tpl, overrides) {
+  var env = Object.assign({}, normalizeEnvelope(tpl && tpl.envelope), (overrides && overrides.envelope) || {});
+  var css = '';
+  if (env.color || env.flapColor) {
+    css += '.envelope-custom #envelope-back{';
+    if (env.color) {
+      css += 'background:' + env.color + '!important;';
+      // Derive border from envelope color (slightly darker)
+      css += 'border-color:' + env.color + '!important;';
+    }
+    css += '}';
+    if (env.flapColor) {
+      var fc = env.flapColor;
+      css += '.envelope-custom .envelope-flap--up,.envelope-custom .envelope-flap--bottom{background-color:' + fc + '!important;}';
+      css += '.envelope-custom .envelope-flap--left{background:linear-gradient(125deg,' + fc + ' 42%,' + env.color + ' 100%)!important;}';
+      css += '.envelope-custom .envelope-flap--right{background:linear-gradient(234deg,' + fc + ' 42%,' + env.color + ' 100%)!important;}';
+    }
+  }
+  // Custom seal image
+  if (env.sealImage) {
+    css += '.open-btn img{content:url(' + env.sealImage + ')!important;}';
+  }
+  return css;
+}
+
+function getEnvelopeAnim(tpl, overrides) {
+  var env = Object.assign({}, normalizeEnvelope(tpl && tpl.envelope), (overrides && overrides.envelope) || {});
+  return env.animation || 'drop';
+}
+
+function getEnvelopeTheme(tpl, overrides) {
+  var env = Object.assign({}, normalizeEnvelope(tpl && tpl.envelope), (overrides && overrides.envelope) || {});
+  return env.theme || 'classic';
+}
+
 function generateCardHtml(skipAnim) {
   const data    = JSON.stringify(state, null, 2);
   const tpl     = state.template  || null;
   const ov      = state.overrides || {};
   const tplVars   = buildTemplateVars(tpl, ov);
   const tplLayout = buildLayoutCss(tpl, ov);
-  const envColor  = (ov.colors && ov.colors.primary) || (tpl && tpl.colors && tpl.colors.primary) || '';
-  const isDark    = (tpl && tpl.envelope === 'dark');
-  const envClass  = isDark ? 'envelope-dark' : '';
-  const extraCss = tplVars + tplLayout + (skipAnim ? NO_ANIM_CSS : '');
+  const envCss    = buildEnvelopeCss(tpl, ov);
+  const envAnim   = getEnvelopeAnim(tpl, ov);
+  const envTheme  = getEnvelopeTheme(tpl, ov);
+  const isDark    = envTheme === 'dark';
+  var tplEnv = normalizeEnvelope(tpl && tpl.envelope);
+  const hasCustomColor = (ov.envelope && (ov.envelope.color || ov.envelope.flapColor)) ||
+                         (tplEnv.color || tplEnv.flapColor);
+  var bodyClasses = [];
+  if (isDark) bodyClasses.push('envelope-dark');
+  if (hasCustomColor) bodyClasses.push('envelope-custom');
+  const extraCss = tplVars + tplLayout + envCss + (skipAnim ? NO_ANIM_CSS : '');
   return '<!DOCTYPE html>\\n' +
     '<html lang="ru">\\n' +
     '<head>\\n' +
@@ -1240,7 +1384,7 @@ function generateCardHtml(skipAnim) {
     '  <title>' + (state.title || 'Открытка') + '</title>\\n' +
     '  <style>\\n' + CARD_CSS + '\\n' + STYLE_CSS + '\\n' + extraCss + '\\n  </style>\\n' +
     '</head>\\n' +
-    '<body class="' + envClass.trim() + '">\\n' +
+    '<body class="' + bodyClasses.join(' ') + '" data-envelope-anim="' + envAnim + '">\\n' +
     CARD_BODY + '\\n' +
     '<script>const jsonData = ' + data + ';<\\/script>\\n' +
     '<script>' + JQUERY_JS + '<\\/script>\\n' +

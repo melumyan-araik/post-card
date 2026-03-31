@@ -66,6 +66,121 @@ img {
     width: 100% !important;
 }
 
+/* ════════════════════════════════════════════════
+   Анимации конверта
+   ════════════════════════════════════════════════ */
+
+/* 1. Вход: падение сверху с отскоком */
+@keyframes envelope-drop {
+    0%   { opacity: 0; transform: translateY(-110px) scale(0.9); }
+    55%  { opacity: 1; transform: translateY(16px) scale(1.02); }
+    75%  { transform: translateY(-8px) scale(0.99); }
+    90%  { transform: translateY(5px) scale(1.005); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.envelope-drop {
+    animation: envelope-drop 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 1b. Влёт слева */
+@keyframes envelope-slide-left {
+    0%   { opacity: 0; transform: translateX(-120px) rotate(-8deg); }
+    60%  { opacity: 1; transform: translateX(12px) rotate(1deg); }
+    80%  { transform: translateX(-6px) rotate(-0.5deg); }
+    100% { opacity: 1; transform: translateX(0) rotate(0); }
+}
+.envelope-slide-left {
+    animation: envelope-slide-left 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 1c. Влёт справа */
+@keyframes envelope-slide-right {
+    0%   { opacity: 0; transform: translateX(120px) rotate(8deg); }
+    60%  { opacity: 1; transform: translateX(-12px) rotate(-1deg); }
+    80%  { transform: translateX(6px) rotate(0.5deg); }
+    100% { opacity: 1; transform: translateX(0) rotate(0); }
+}
+.envelope-slide-right {
+    animation: envelope-slide-right 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 1d. Плавное появление с масштабом */
+@keyframes envelope-fade-scale {
+    0%   { opacity: 0; transform: scale(0.7); }
+    60%  { opacity: 1; transform: scale(1.04); }
+    80%  { transform: scale(0.98); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.envelope-fade-scale {
+    animation: envelope-fade-scale 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 1e. Выезд снизу */
+@keyframes envelope-slide-up {
+    0%   { opacity: 0; transform: translateY(120px) scale(0.95); }
+    55%  { opacity: 1; transform: translateY(-12px) scale(1.01); }
+    75%  { transform: translateY(6px) scale(0.995); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.envelope-slide-up {
+    animation: envelope-slide-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Кастомные цвета конверта ── */
+.envelope-custom #envelope-back {
+    border-radius: 20px;
+}
+.envelope-custom .envelope-flaps {
+    border-radius: 20px;
+    overflow: hidden;
+}
+.envelope-custom .envelop-rotate {
+    border-radius: 20px;
+    overflow: hidden;
+}
+.envelope-custom .envelope-flap {
+    border-radius: 0 !important;
+}
+.envelope-custom .gift-card-block {
+    border-radius: 20px !important;
+}
+
+/* 2. Покачивание — подсказка нажать */
+@keyframes envelope-wobble {
+    0%, 100% { transform: rotate(0deg); }
+    20%      { transform: rotate(-4deg); }
+    40%      { transform: rotate(4deg); }
+    60%      { transform: rotate(-2.5deg); }
+    80%      { transform: rotate(2deg); }
+}
+.envelope-wobble {
+    animation: envelope-wobble 0.75s ease-in-out;
+}
+
+/* 3. Пульс печати */
+@keyframes seal-pulse {
+    0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 0px  rgba(100, 50, 20, 0)); }
+    50%      { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(100, 50, 20, 0.45)); }
+}
+.open-btn img {
+    animation: seal-pulse 2.4s ease-in-out infinite;
+    animation-delay: 2s;
+    cursor: pointer;
+}
+
+/* 4. Fade-in содержимого карточки после выезда */
+@keyframes card-content-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.card-content-visible .mail-text__grats,
+.card-content-visible #event {
+    animation: card-content-in 0.5s ease-out both;
+}
+.card-content-visible .mail-text__grats {
+    animation-delay: 0.15s;
+}
+
 /* Стили слайдера */
 .sim-slider {
     position: relative;

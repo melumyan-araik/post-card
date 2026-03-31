@@ -342,7 +342,7 @@
       max-height: 0;
       transition: max-height 0.3s ease;
     }
-    .custom-panel.open { max-height: 600px; }
+    .custom-panel.open { max-height: 1200px; }
 
     .custom-header {
       display: flex;
@@ -555,6 +555,46 @@
             </label>
           </div>
         </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f0f2f5">
+          <label style="display:block;font-size:11px;font-weight:600;color:#5a6480;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Конверт</label>
+          <div style="margin-bottom:10px">
+            <label style="display:block;font-size:11px;color:#5a6480;margin-bottom:4px">Анимация входа</label>
+            <select id="env-anim" onchange="setOverrideEnvelope('animation', this.value)" style="width:100%;padding:7px 10px;border:1px solid #dde2ee;border-radius:6px;font-size:13px;background:#fafbfd;outline:none;cursor:pointer">
+              <option value="drop">Падение сверху</option>
+              <option value="slide-left">Влёт слева</option>
+              <option value="slide-right">Влёт справа</option>
+              <option value="fade-scale">Плавное появление</option>
+              <option value="slide-up">Выезд снизу</option>
+            </select>
+          </div>
+          <div class="color-row">
+            <div class="color-field">
+              <label>Цвет конверта</label>
+              <div class="color-swatch-wrap" onclick="document.getElementById('cp-envcolor').click()">
+                <input type="color" id="cp-envcolor" oninput="setOverrideEnvelope('color', this.value)">
+                <div class="color-dot" id="dot-envcolor"></div>
+                <span class="color-hex" id="hex-envcolor">#ffffff</span>
+              </div>
+            </div>
+            <div class="color-field">
+              <label>Цвет клапанов</label>
+              <div class="color-swatch-wrap" onclick="document.getElementById('cp-envflap').click()">
+                <input type="color" id="cp-envflap" oninput="setOverrideEnvelope('flapColor', this.value)">
+                <div class="color-dot" id="dot-envflap"></div>
+                <span class="color-hex" id="hex-envflap">#f0f0f0</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="display:block;font-size:11px;font-weight:600;color:#5a6480;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Печать (сургуч)</label>
+            <div class="upload-zone" onclick="document.getElementById('f-seal').click()" style="padding:10px">
+              <input type="file" id="f-seal" accept="image/*" onchange="handleSealImage(this)">
+              <span style="font-size:20px;display:block;margin-bottom:2px">&#128274;</span>
+              Загрузить изображение печати
+            </div>
+            <div id="seal-preview-area"></div>
+          </div>
+        </div>
         <span class="reset-link" onclick="resetOverrides()">Сбросить к шаблону</span>
       </div>
 
@@ -655,7 +695,12 @@ const TEMPLATES = [
       "text": "#e2d9f3",
       "wishes": "#c4b5fd"
     },
-    "envelope": "dark",
+    "envelope": {
+      "animation": "fade-scale",
+      "color": "#1e1b2e",
+      "flapColor": "#3d3560",
+      "theme": "dark"
+    },
     "typography": {
       "wishesSize": "16px",
       "align": "center"
@@ -674,7 +719,12 @@ const TEMPLATES = [
       "text": "#1a2340",
       "wishes": "#2c3e50"
     },
-    "envelope": "classic",
+    "envelope": {
+      "animation": "drop",
+      "color": "#ffffff",
+      "flapColor": "#f0f0f0",
+      "theme": "classic"
+    },
     "typography": {
       "wishesSize": "16px",
       "align": "center"
@@ -693,7 +743,12 @@ const TEMPLATES = [
       "text": "#1a1a1a",
       "wishes": "#c0156e"
     },
-    "envelope": "classic",
+    "envelope": {
+      "animation": "slide-left",
+      "color": "#fff0f5",
+      "flapColor": "#fce4ec",
+      "theme": "classic"
+    },
     "typography": {
       "wishesSize": "17px",
       "align": "center"
@@ -712,7 +767,12 @@ const TEMPLATES = [
       "text": "#1b5e20",
       "wishes": "#33691e"
     },
-    "envelope": "classic",
+    "envelope": {
+      "animation": "slide-up",
+      "color": "#e8f5e9",
+      "flapColor": "#c8e6c9",
+      "theme": "classic"
+    },
     "typography": {
       "wishesSize": "16px",
       "align": "center"
@@ -4581,6 +4641,121 @@ img {
     width: 100% !important;
 }
 
+/* ════════════════════════════════════════════════
+   Анимации конверта
+   ════════════════════════════════════════════════ */
+
+/* 1. Вход: падение сверху с отскоком */
+@keyframes envelope-drop {
+    0%   { opacity: 0; transform: translateY(-110px) scale(0.9); }
+    55%  { opacity: 1; transform: translateY(16px) scale(1.02); }
+    75%  { transform: translateY(-8px) scale(0.99); }
+    90%  { transform: translateY(5px) scale(1.005); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.envelope-drop {
+    animation: envelope-drop 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 1b. Влёт слева */
+@keyframes envelope-slide-left {
+    0%   { opacity: 0; transform: translateX(-120px) rotate(-8deg); }
+    60%  { opacity: 1; transform: translateX(12px) rotate(1deg); }
+    80%  { transform: translateX(-6px) rotate(-0.5deg); }
+    100% { opacity: 1; transform: translateX(0) rotate(0); }
+}
+.envelope-slide-left {
+    animation: envelope-slide-left 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 1c. Влёт справа */
+@keyframes envelope-slide-right {
+    0%   { opacity: 0; transform: translateX(120px) rotate(8deg); }
+    60%  { opacity: 1; transform: translateX(-12px) rotate(-1deg); }
+    80%  { transform: translateX(6px) rotate(0.5deg); }
+    100% { opacity: 1; transform: translateX(0) rotate(0); }
+}
+.envelope-slide-right {
+    animation: envelope-slide-right 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 1d. Плавное появление с масштабом */
+@keyframes envelope-fade-scale {
+    0%   { opacity: 0; transform: scale(0.7); }
+    60%  { opacity: 1; transform: scale(1.04); }
+    80%  { transform: scale(0.98); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.envelope-fade-scale {
+    animation: envelope-fade-scale 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 1e. Выезд снизу */
+@keyframes envelope-slide-up {
+    0%   { opacity: 0; transform: translateY(120px) scale(0.95); }
+    55%  { opacity: 1; transform: translateY(-12px) scale(1.01); }
+    75%  { transform: translateY(6px) scale(0.995); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.envelope-slide-up {
+    animation: envelope-slide-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Кастомные цвета конверта ── */
+.envelope-custom #envelope-back {
+    border-radius: 20px;
+}
+.envelope-custom .envelope-flaps {
+    border-radius: 20px;
+    overflow: hidden;
+}
+.envelope-custom .envelop-rotate {
+    border-radius: 20px;
+    overflow: hidden;
+}
+.envelope-custom .envelope-flap {
+    border-radius: 0 !important;
+}
+.envelope-custom .gift-card-block {
+    border-radius: 20px !important;
+}
+
+/* 2. Покачивание — подсказка нажать */
+@keyframes envelope-wobble {
+    0%, 100% { transform: rotate(0deg); }
+    20%      { transform: rotate(-4deg); }
+    40%      { transform: rotate(4deg); }
+    60%      { transform: rotate(-2.5deg); }
+    80%      { transform: rotate(2deg); }
+}
+.envelope-wobble {
+    animation: envelope-wobble 0.75s ease-in-out;
+}
+
+/* 3. Пульс печати */
+@keyframes seal-pulse {
+    0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 0px  rgba(100, 50, 20, 0)); }
+    50%      { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(100, 50, 20, 0.45)); }
+}
+.open-btn img {
+    animation: seal-pulse 2.4s ease-in-out infinite;
+    animation-delay: 2s;
+    cursor: pointer;
+}
+
+/* 4. Fade-in содержимого карточки после выезда */
+@keyframes card-content-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.card-content-visible .mail-text__grats,
+.card-content-visible #event {
+    animation: card-content-in 0.5s ease-out both;
+}
+.card-content-visible .mail-text__grats {
+    animation-delay: 0.15s;
+}
+
 /* Стили слайдера */
 .sim-slider {
     position: relative;
@@ -5082,7 +5257,12 @@ document.addEventListener("DOMContentLoaded", function() {
   if (jsonData.qrCode && qrEl) {
     const img = document.createElement('img');
     img.src = jsonData.qrCode;
-    img.style.maxWidth = '100px';
+    img.style.maxWidth = '380px';
+    img.style.width = '100%';
+    img.style.height = 'auto';
+    img.style.display = 'block';
+    img.style.margin = '12px auto';
+    img.style.borderRadius = '8px';
     qrEl.appendChild(img);
   }
 
@@ -5115,24 +5295,22 @@ $(document).ready(function () {
         myHandler();
     }
     function startAnimation() {
-        // 1. Show back of envelope smoothly
+        window._cardOpened = true;
+        $('#_jsi_tooltip-holder').removeClass('hover');
+        $('#envelope-back').removeClass('envelope-wobble');
+
         setTimeout(
             function () {
-                // 1.1 Hide front envelope
-
-
-                    // 2. Move envelope down
-                    var envHeight = $('#envelope-front').height();
-                    var downHeight = parseInt(envHeight * 0.67);
-
                     var $elem = $('.envelop-rotate');
+
+                    // Perspective для 3D-эффекта клапана
+                    $elem.parent().css('perspective', '900px');
 
                     $({deg: 0}).animate({deg: 90}, {
                         duration: 400,
                         step: function (now) {
-
                             $elem.css({
-                                transform: 'rotateX(' + now + 'deg)'
+                                transform: 'perspective(900px) rotateX(' + now + 'deg)'
                             });
                         },
                         complete: function () {
@@ -5140,9 +5318,8 @@ $(document).ready(function () {
                             $({deg: 90}).animate({deg: 180}, {
                                 duration: 400,
                                 step: function (now) {
-
                                     $elem.css({
-                                        transform: 'rotateX(' + now + 'deg)'
+                                        transform: 'perspective(900px) rotateX(' + now + 'deg)'
                                     });
                                 },
                                 complete: function () {
@@ -5155,33 +5332,26 @@ $(document).ready(function () {
                                         }, 2001);
                                     });
                                     $('#gift-card').animate(
-
-                                        {top: '-500px'}
+                                        {top: '-500px'},
+                                        { duration: 600, easing: 'swing',
+                                          complete: function() {
+                                              // Fade-in содержимого карточки
+                                              $('.gift-card__inner').addClass('card-content-visible');
+                                          }
+                                        }
                                     );
                                     $('.envelope-flaps, .envelop-rotate').animate(
-                                        // { top: '-' + (downHeight + additional) + 'px' },
-                                        {
-                                            top: '300px',
-                                            opacity: 0
-                                        }, 1000
-                                    )
+                                        { top: '300px', opacity: 0 }, 1000
+                                    );
                                 }
                             });
                         }
                     });
 
-
-                    //
-                    $('#envelope-back').animate(
-                        {top: 500 + 'px'}, 1000
-                    );
-
-
-
+                    $('#envelope-back').animate({top: 500 + 'px'}, 1000);
             },
             200
         );
-
     }
 
 
@@ -5201,88 +5371,86 @@ function myHandler(e) {
 
 
     function startAnimation() {
+        window._cardOpened = true;
+        $('#_jsi_tooltip-holder').removeClass('hover');
+        $('#envelope-back').removeClass('envelope-wobble');
 
+        setTimeout(function () {
+            var $elem = $('.envelop-rotate');
+            $elem.parent().css('perspective', '900px');
 
-        // 1. Show back of envelope smoothly
-        setTimeout(
-            function () {
-                    // 2. Move envelope down
-                    var envHeight = $('#envelope-front').height();
-                    var downHeight = parseInt(envHeight * 0.67);
-
-
-
-
-
-                            // 3. Hide flap-up
-                            // $('#envelope-back').removeClass('envelope--close');
-                            // $('#envelope-back').addClass('envelope--open');
-                            var $elem = $('.envelop-rotate');
-
-                            $({deg: 0}).animate({deg: 90}, {
-                                duration: 400,
-                                step: function (now) {
-                                    // in the step-callback (that is fired each step of the animation),
-                                    // you can use the \`now\` paramter which contains the current
-                                    // animation-position (\`0\` up to \`angle\`)
-                                    $elem.css({
-                                        transform: 'rotateX(' + now + 'deg)'
-                                    });
-                                },
-                                complete: function () {
-                                    $('#envelope-back').addClass('envelope--open');
-                                    $({deg: 90}).animate({deg: 180}, {
-                                        duration: 400,
-                                        step: function (now) {
-                                            // in the step-callback (that is fired each step of the animation),
-                                            // you can use the \`now\` paramter which contains the current
-                                            // animation-position (\`0\` up to \`angle\`)
-                                            $elem.css({
-                                                transform: 'rotateX(' + now + 'deg)'
-                                            });
-                                        },
-                                        complete: function () {
-                                            setTimeout(function () {
-                                                $('.envelope-flaps').css('z-index', '5');
-                                                $('#gift-card').css('overflow', 'visible').css('z-index', '4')
-
-                                                setTimeout(function () {
-                                                    $('.envelope-flaps').css('display', 'none');
-                                                }, 1000);
-                                            });
-                                            $('#gift-card').animate(
-                                                // { top: '-' + (downHeight + additional) + 'px' },
-                                                {top: '-450px'}
-                                            );
-                                            $('.envelope-flaps, .envelop-rotate').animate(
-                                                // { top: '-' + (downHeight + additional) + 'px' },
-                                                {
-                                                    top: '500px',
-                                                    opacity: 0
-                                                }, 500
-                                            )
-                                        }
-                                    });
-                                }
+            $({deg: 0}).animate({deg: 90}, {
+                duration: 400,
+                step: function (now) {
+                    $elem.css({
+                        transform: 'perspective(900px) rotateX(' + now + 'deg)'
+                    });
+                },
+                complete: function () {
+                    $('#envelope-back').addClass('envelope--open');
+                    $({deg: 90}).animate({deg: 180}, {
+                        duration: 400,
+                        step: function (now) {
+                            $elem.css({
+                                transform: 'perspective(900px) rotateX(' + now + 'deg)'
                             });
-
-
-                            //
-                            $('#envelope-back').animate(
-                                {top: 500 + 'px'}, 1000
+                        },
+                        complete: function () {
+                            setTimeout(function () {
+                                $('.envelope-flaps').css('z-index', '5');
+                                $('#gift-card').css('overflow', 'visible').css('z-index', '4');
+                                setTimeout(function () {
+                                    $('.envelope-flaps').css('display', 'none');
+                                }, 1000);
+                            });
+                            $('#gift-card').animate(
+                                {top: '-450px'},
+                                {
+                                    duration: 600,
+                                    easing: 'swing',
+                                    complete: function () {
+                                        $('.gift-card__inner').addClass('card-content-visible');
+                                    }
+                                }
                             );
+                            $('.envelope-flaps, .envelop-rotate').animate(
+                                {top: '500px', opacity: 0}, 1000
+                            );
+                        }
+                    });
+                }
+            });
 
-            },
-            200
-        );
+            $('#envelope-back').animate(
+                {top: 500 + 'px'}, 1000
+            );
+        }, 200);
     }
 }
 
     setTimeout(function() {
-        $('.animation-block').removeClass('hide').addClass('bounceInLeft animated');
+        // Тип анимации входа из data-атрибута или по умолчанию drop
+        var entranceAnim = document.body.getAttribute('data-envelope-anim') || 'drop';
+        var animClass = 'envelope-' + entranceAnim;
+        $('.animation-block').removeClass('hide').addClass(animClass);
+
+        // Подсказка появляется быстрее
         setTimeout(function() {
             $('#_jsi_tooltip-holder').addClass('hover');
+        }, 2000);
+
+        // Покачивание каждые 4 сек если конверт не открыт
+        var _wobbleInterval = setInterval(function() {
+            if (window._cardOpened || !$('.envelop-rotate').is(':visible')) {
+                clearInterval(_wobbleInterval);
+                return;
+            }
+            $('#envelope-back').addClass('envelope-wobble');
+            setTimeout(function() {
+                $('#envelope-back').removeClass('envelope-wobble');
+            }, 800);
         }, 4000);
+
     }, 1000);
 
     // Masked input
@@ -5846,7 +6014,7 @@ function renderTemplates() {
 
 function selectTemplate(tpl) {
   state.template = tpl;
-  state.overrides = { colors: {}, layout: {} };
+  state.overrides = { colors: {}, layout: {}, envelope: {} };
   renderTemplates();
   syncCustomPanel();
   scheduleUpdate();
@@ -5860,11 +6028,23 @@ function syncCustomPanel() {
   const tpl = state.template || {};
   const c = Object.assign({}, tpl.colors || {}, (state.overrides && state.overrides.colors) || {});
   const l = Object.assign({}, tpl.layout || {}, (state.overrides && state.overrides.layout) || {});
+  const env = Object.assign({}, normalizeEnvelope(tpl.envelope), (state.overrides && state.overrides.envelope) || {});
 
   setColorPicker('primary', c.primary || '#0fc3ad');
   setColorPicker('cardbg',  c.cardBg  || '#f1f3f8');
   setColorPicker('wishes',  c.wishes  || '#2c3e50');
   setColorPicker('text',    c.text    || '#1a2340');
+
+  // Envelope colors
+  setColorPicker('envcolor',  env.color     || '#ffffff');
+  setColorPicker('envflap',   env.flapColor || '#f0f0f0');
+
+  // Envelope animation select
+  const animSelect = document.getElementById('env-anim');
+  if (animSelect) animSelect.value = env.animation || 'drop';
+
+  // Seal preview
+  renderSealPreview();
 
   const sliderEl = document.getElementById('lt-slider');
   const qrEl     = document.getElementById('lt-qr');
@@ -5895,9 +6075,48 @@ function setOverrideLayout(key, val) {
 }
 
 function resetOverrides() {
-  state.overrides = { colors: {}, layout: {} };
+  state.overrides = { colors: {}, layout: {}, envelope: {} };
   syncCustomPanel();
   scheduleUpdate();
+}
+
+function setOverrideEnvelope(key, val) {
+  if (!state.overrides) state.overrides = { colors: {}, layout: {}, envelope: {} };
+  if (!state.overrides.envelope) state.overrides.envelope = {};
+  state.overrides.envelope[key] = val;
+  if (key === 'color') setColorPicker('envcolor', val);
+  if (key === 'flapColor') setColorPicker('envflap', val);
+  scheduleUpdate();
+}
+
+function handleSealImage(input) {
+  if (!input.files.length) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    setOverrideEnvelope('sealImage', e.target.result);
+    renderSealPreview();
+  };
+  reader.readAsDataURL(input.files[0]);
+  input.value = '';
+}
+
+function removeSeal() {
+  if (state.overrides && state.overrides.envelope) {
+    delete state.overrides.envelope.sealImage;
+  }
+  renderSealPreview();
+  scheduleUpdate();
+}
+
+function renderSealPreview() {
+  var area = document.getElementById('seal-preview-area');
+  if (!area) return;
+  var env = Object.assign({}, normalizeEnvelope(state.template && state.template.envelope), (state.overrides && state.overrides.envelope) || {});
+  if (env.sealImage) {
+    area.innerHTML = '<div class="qr-preview"><img src="' + env.sealImage + '"><span class="qr-del" onclick="removeSeal()">Удалить</span></div>';
+  } else {
+    area.innerHTML = '';
+  }
 }
 
 function toggleCustomPanel() {
@@ -5913,7 +6132,7 @@ function toggleCustomPanel() {
 
 function init() {
   state.template  = TEMPLATES[0];
-  state.overrides = { colors: {}, layout: {} };
+  state.overrides = { colors: {}, layout: {}, envelope: {} };
   renderTemplates();
   syncCustomPanel();
   renderWishes();
@@ -6070,16 +6289,64 @@ function buildLayoutCss(tpl, overrides) {
   return css;
 }
 
+function normalizeEnvelope(e) {
+  if (!e) return {};
+  if (typeof e === 'string') return { theme: e, animation: 'drop' };
+  return e;
+}
+
+function buildEnvelopeCss(tpl, overrides) {
+  var env = Object.assign({}, normalizeEnvelope(tpl && tpl.envelope), (overrides && overrides.envelope) || {});
+  var css = '';
+  if (env.color || env.flapColor) {
+    css += '.envelope-custom #envelope-back{';
+    if (env.color) {
+      css += 'background:' + env.color + '!important;';
+      // Derive border from envelope color (slightly darker)
+      css += 'border-color:' + env.color + '!important;';
+    }
+    css += '}';
+    if (env.flapColor) {
+      var fc = env.flapColor;
+      css += '.envelope-custom .envelope-flap--up,.envelope-custom .envelope-flap--bottom{background-color:' + fc + '!important;}';
+      css += '.envelope-custom .envelope-flap--left{background:linear-gradient(125deg,' + fc + ' 42%,' + env.color + ' 100%)!important;}';
+      css += '.envelope-custom .envelope-flap--right{background:linear-gradient(234deg,' + fc + ' 42%,' + env.color + ' 100%)!important;}';
+    }
+  }
+  // Custom seal image
+  if (env.sealImage) {
+    css += '.open-btn img{content:url(' + env.sealImage + ')!important;}';
+  }
+  return css;
+}
+
+function getEnvelopeAnim(tpl, overrides) {
+  var env = Object.assign({}, normalizeEnvelope(tpl && tpl.envelope), (overrides && overrides.envelope) || {});
+  return env.animation || 'drop';
+}
+
+function getEnvelopeTheme(tpl, overrides) {
+  var env = Object.assign({}, normalizeEnvelope(tpl && tpl.envelope), (overrides && overrides.envelope) || {});
+  return env.theme || 'classic';
+}
+
 function generateCardHtml(skipAnim) {
   const data    = JSON.stringify(state, null, 2);
   const tpl     = state.template  || null;
   const ov      = state.overrides || {};
   const tplVars   = buildTemplateVars(tpl, ov);
   const tplLayout = buildLayoutCss(tpl, ov);
-  const envColor  = (ov.colors && ov.colors.primary) || (tpl && tpl.colors && tpl.colors.primary) || '';
-  const isDark    = (tpl && tpl.envelope === 'dark');
-  const envClass  = isDark ? 'envelope-dark' : '';
-  const extraCss = tplVars + tplLayout + (skipAnim ? NO_ANIM_CSS : '');
+  const envCss    = buildEnvelopeCss(tpl, ov);
+  const envAnim   = getEnvelopeAnim(tpl, ov);
+  const envTheme  = getEnvelopeTheme(tpl, ov);
+  const isDark    = envTheme === 'dark';
+  var tplEnv = normalizeEnvelope(tpl && tpl.envelope);
+  const hasCustomColor = (ov.envelope && (ov.envelope.color || ov.envelope.flapColor)) ||
+                         (tplEnv.color || tplEnv.flapColor);
+  var bodyClasses = [];
+  if (isDark) bodyClasses.push('envelope-dark');
+  if (hasCustomColor) bodyClasses.push('envelope-custom');
+  const extraCss = tplVars + tplLayout + envCss + (skipAnim ? NO_ANIM_CSS : '');
   return '<!DOCTYPE html>\n' +
     '<html lang="ru">\n' +
     '<head>\n' +
@@ -6088,7 +6355,7 @@ function generateCardHtml(skipAnim) {
     '  <title>' + (state.title || 'Открытка') + '</title>\n' +
     '  <style>\n' + CARD_CSS + '\n' + STYLE_CSS + '\n' + extraCss + '\n  </style>\n' +
     '</head>\n' +
-    '<body class="' + envClass.trim() + '">\n' +
+    '<body class="' + bodyClasses.join(' ') + '" data-envelope-anim="' + envAnim + '">\n' +
     CARD_BODY + '\n' +
     '<script>const jsonData = ' + data + ';<\/script>\n' +
     '<script>' + JQUERY_JS + '<\/script>\n' +

@@ -7,7 +7,12 @@
     "text": "#1a1a1a",
     "wishes": "#c0156e"
   },
-  "envelope": "classic",
+  "envelope": {
+    "animation": "slide-left",
+    "color": "#fff0f5",
+    "flapColor": "#fce4ec",
+    "theme": "classic"
+  },
   "typography": {
     "wishesSize": "17px",
     "align": "center"
