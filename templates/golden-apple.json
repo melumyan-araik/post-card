@@ -1,0 +1,24 @@
+{
+  "id": "golden-apple",
+  "name": "Золотое Яблоко",
+  "colors": {
+    "primary": "#E91E8C",
+    "cardBg": "#fff5f9",
+    "text": "#1a1a1a",
+    "wishes": "#c0156e"
+  },
+  "envelope": {
+    "animation": "slide-left",
+    "color": "#fff0f5",
+    "flapColor": "#fce4ec",
+    "theme": "classic"
+  },
+  "typography": {
+    "wishesSize": "17px",
+    "align": "center"
+  },
+  "layout": {
+    "showSlider": true,
+    "showQr": true
+  }
+}

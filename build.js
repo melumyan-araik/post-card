@@ -60,6 +60,14 @@ const faviconB64  = readB64(path.join(IMG, 'favicon.ico'));
 const fotGifB64   = readB64(path.join(IMG, 'fot.gif'));
 const button2B64  = readB64(path.join(IMG, 'button2.png'));
 
+// ── Читаем шаблоны ─────────────────────────────────────────────────────────
+
+const TEMPLATES_DIR = path.join(ROOT, 'templates');
+const templates = fs.readdirSync(TEMPLATES_DIR)
+  .filter(f => f.endsWith('.json'))
+  .map(f => JSON.parse(read(path.join(TEMPLATES_DIR, f))));
+
+console.log(`Загружено шаблонов: ${templates.length}`);
 console.log('Исходники прочитаны. Генерирую admin.html...');
 
 // ── Шаблон HTML открытки (встраивается в iframe) ───────────────────────────
@@ -180,7 +188,12 @@ document.addEventListener("DOMContentLoaded", function() {
   if (jsonData.qrCode && qrEl) {
     const img = document.createElement('img');
     img.src = jsonData.qrCode;
-    img.style.maxWidth = '100px';
+    img.style.maxWidth = '380px';
+    img.style.width = '100%';
+    img.style.height = 'auto';
+    img.style.display = 'block';
+    img.style.margin = '12px auto';
+    img.style.borderRadius = '8px';
     qrEl.appendChild(img);
   }
 
@@ -567,6 +580,144 @@ const adminHtml = `<!DOCTYPE html>
       margin-left: 4px;
     }
 
+    /* ── Выбор шаблона ── */
+    .section-title { margin-top: 8px; }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .template-card {
+      border: 2px solid #e2e6ee;
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      background: #fafbfd;
+    }
+    .template-card:hover { border-color: #4c75af; }
+    .template-card.active {
+      border-color: #0fc3ad;
+      box-shadow: 0 0 0 2px rgba(15,195,173,0.2);
+      background: #f0fdfb;
+    }
+    .template-swatch {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+    .template-swatch span {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-block;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+    .template-card .tpl-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1a2340;
+    }
+
+    /* ── Панель кастомизации ── */
+    .custom-panel {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.3s ease;
+    }
+    .custom-panel.open { max-height: 1200px; }
+
+    .custom-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .custom-header .chevron {
+      font-size: 12px;
+      color: #8899bb;
+      transition: transform 0.2s;
+    }
+    .custom-header.open .chevron { transform: rotate(180deg); }
+
+    .color-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .color-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #5a6480;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .color-swatch-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #dde2ee;
+      border-radius: 6px;
+      padding: 5px 8px;
+      background: #fafbfd;
+      cursor: pointer;
+    }
+    .color-swatch-wrap:hover { border-color: #4c75af; }
+    .color-swatch-wrap input[type="color"] {
+      width: 0; height: 0; opacity: 0; position: absolute; pointer-events: none;
+    }
+    .color-dot {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+    .color-hex {
+      font-size: 12px;
+      font-family: monospace;
+      color: #5a6480;
+    }
+
+    .layout-toggles { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+    .layout-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #3a4460;
+    }
+    .toggle-switch {
+      position: relative; width: 36px; height: 20px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-switch .slider {
+      position: absolute; inset: 0;
+      background: #dde2ee; border-radius: 20px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .toggle-switch .slider::before {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      left: 3px; top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle-switch input:checked + .slider { background: #0fc3ad; }
+    .toggle-switch input:checked + .slider::before { transform: translateX(16px); }
+
+    .reset-link {
+      font-size: 11px; color: #8899bb; cursor: pointer;
+      text-decoration: underline; display: block; text-align: right; margin-top: 8px;
+    }
+    .reset-link:hover { color: #4c75af; }
+
     /* ── Тоггл анимации ── */
     .anim-toggle {
       display: inline-flex;
@@ -628,6 +779,108 @@ const adminHtml = `<!DOCTYPE html>
   <!-- ── Левая панель ── -->
   <div class="editor">
     <div class="editor-body">
+
+      <div class="section-title" style="margin-top:0">Шаблон</div>
+      <div class="template-grid" id="template-grid"></div>
+
+      <div class="section-title custom-header" id="custom-header" onclick="toggleCustomPanel()">
+        Кастомизация
+        <span class="chevron">&#9650;</span>
+      </div>
+      <div class="custom-panel open" id="custom-panel">
+        <div class="color-row">
+          <div class="color-field">
+            <label>Акцент</label>
+            <div class="color-swatch-wrap" onclick="document.getElementById('cp-primary').click()">
+              <input type="color" id="cp-primary" oninput="setOverrideColor('primary', this.value)">
+              <div class="color-dot" id="dot-primary"></div>
+              <span class="color-hex" id="hex-primary">#000000</span>
+            </div>
+          </div>
+          <div class="color-field">
+            <label>Фон карточки</label>
+            <div class="color-swatch-wrap" onclick="document.getElementById('cp-cardbg').click()">
+              <input type="color" id="cp-cardbg" oninput="setOverrideColor('cardBg', this.value)">
+              <div class="color-dot" id="dot-cardbg"></div>
+              <span class="color-hex" id="hex-cardbg">#000000</span>
+            </div>
+          </div>
+          <div class="color-field">
+            <label>Пожелания</label>
+            <div class="color-swatch-wrap" onclick="document.getElementById('cp-wishes').click()">
+              <input type="color" id="cp-wishes" oninput="setOverrideColor('wishes', this.value)">
+              <div class="color-dot" id="dot-wishes"></div>
+              <span class="color-hex" id="hex-wishes">#000000</span>
+            </div>
+          </div>
+          <div class="color-field">
+            <label>Текст</label>
+            <div class="color-swatch-wrap" onclick="document.getElementById('cp-text').click()">
+              <input type="color" id="cp-text" oninput="setOverrideColor('text', this.value)">
+              <div class="color-dot" id="dot-text"></div>
+              <span class="color-hex" id="hex-text">#000000</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="layout-toggles">
+          <div class="layout-row">
+            <span>Слайдер фотографий</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="lt-slider" checked onchange="setOverrideLayout('showSlider', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="layout-row">
+            <span>QR-код / Сертификат</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="lt-qr" checked onchange="setOverrideLayout('showQr', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f0f2f5">
+          <label style="display:block;font-size:11px;font-weight:600;color:#5a6480;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Конверт</label>
+          <div style="margin-bottom:10px">
+            <label style="display:block;font-size:11px;color:#5a6480;margin-bottom:4px">Анимация входа</label>
+            <select id="env-anim" onchange="setOverrideEnvelope('animation', this.value)" style="width:100%;padding:7px 10px;border:1px solid #dde2ee;border-radius:6px;font-size:13px;background:#fafbfd;outline:none;cursor:pointer">
+              <option value="drop">Падение сверху</option>
+              <option value="slide-left">Влёт слева</option>
+              <option value="slide-right">Влёт справа</option>
+              <option value="fade-scale">Плавное появление</option>
+              <option value="slide-up">Выезд снизу</option>
+            </select>
+          </div>
+          <div class="color-row">
+            <div class="color-field">
+              <label>Цвет конверта</label>
+              <div class="color-swatch-wrap" onclick="document.getElementById('cp-envcolor').click()">
+                <input type="color" id="cp-envcolor" oninput="setOverrideEnvelope('color', this.value)">
+                <div class="color-dot" id="dot-envcolor"></div>
+                <span class="color-hex" id="hex-envcolor">#ffffff</span>
+              </div>
+            </div>
+            <div class="color-field">
+              <label>Цвет клапанов</label>
+              <div class="color-swatch-wrap" onclick="document.getElementById('cp-envflap').click()">
+                <input type="color" id="cp-envflap" oninput="setOverrideEnvelope('flapColor', this.value)">
+                <div class="color-dot" id="dot-envflap"></div>
+                <span class="color-hex" id="hex-envflap">#f0f0f0</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="display:block;font-size:11px;font-weight:600;color:#5a6480;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Печать (сургуч)</label>
+            <div class="upload-zone" onclick="document.getElementById('f-seal').click()" style="padding:10px">
+              <input type="file" id="f-seal" accept="image/*" onchange="handleSealImage(this)">
+              <span style="font-size:20px;display:block;margin-bottom:2px">&#128274;</span>
+              Загрузить изображение печати
+            </div>
+            <div id="seal-preview-area"></div>
+          </div>
+        </div>
+        <span class="reset-link" onclick="resetOverrides()">Сбросить к шаблону</span>
+      </div>
 
       <div class="section-title">Основное</div>
 
@@ -716,6 +969,7 @@ const adminHtml = `<!DOCTYPE html>
 //  Встроенные ресурсы открытки (читаются build.js из исходников)
 // ══════════════════════════════════════════════════════════════════
 
+const TEMPLATES = ${JSON.stringify(templates, null, 2)};
 const NO_ANIM_CSS = \`${NO_ANIM_ESC}\`;
 const CARD_CSS   = \`${CSS_ESCAPED}\`;
 const STYLE_CSS  = \`${STYLE_ESCAPED}\`;
@@ -765,10 +1019,151 @@ let state = {
 };
 
 // ══════════════════════════════════════════════════════════════════
+//  Шаблоны
+// ══════════════════════════════════════════════════════════════════
+
+function renderTemplates() {
+  const grid = document.getElementById('template-grid');
+  grid.innerHTML = '';
+  TEMPLATES.forEach(function(tpl) {
+    const card = document.createElement('div');
+    card.className = 'template-card' + (state.template && state.template.id === tpl.id ? ' active' : '');
+    card.onclick = function() { selectTemplate(tpl); };
+    const c = tpl.colors || {};
+    card.innerHTML =
+      '<div class="template-swatch">' +
+        '<span style="background:' + (c.primary || '#ccc') + '"></span>' +
+        '<span style="background:' + (c.cardBg  || '#fff') + '"></span>' +
+        '<span style="background:' + (c.wishes  || '#333') + '"></span>' +
+      '</div>' +
+      '<div class="tpl-name">' + tpl.name + '</div>';
+    grid.appendChild(card);
+  });
+}
+
+function selectTemplate(tpl) {
+  state.template = tpl;
+  state.overrides = { colors: {}, layout: {}, envelope: {} };
+  renderTemplates();
+  syncCustomPanel();
+  scheduleUpdate();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  Кастомизация (оверрайды поверх шаблона)
+// ══════════════════════════════════════════════════════════════════
+
+function syncCustomPanel() {
+  const tpl = state.template || {};
+  const c = Object.assign({}, tpl.colors || {}, (state.overrides && state.overrides.colors) || {});
+  const l = Object.assign({}, tpl.layout || {}, (state.overrides && state.overrides.layout) || {});
+  const env = Object.assign({}, normalizeEnvelope(tpl.envelope), (state.overrides && state.overrides.envelope) || {});
+
+  setColorPicker('primary', c.primary || '#0fc3ad');
+  setColorPicker('cardbg',  c.cardBg  || '#f1f3f8');
+  setColorPicker('wishes',  c.wishes  || '#2c3e50');
+  setColorPicker('text',    c.text    || '#1a2340');
+
+  // Envelope colors
+  setColorPicker('envcolor',  env.color     || '#ffffff');
+  setColorPicker('envflap',   env.flapColor || '#f0f0f0');
+
+  // Envelope animation select
+  const animSelect = document.getElementById('env-anim');
+  if (animSelect) animSelect.value = env.animation || 'drop';
+
+  // Seal preview
+  renderSealPreview();
+
+  const sliderEl = document.getElementById('lt-slider');
+  const qrEl     = document.getElementById('lt-qr');
+  if (sliderEl) sliderEl.checked = l.showSlider !== false;
+  if (qrEl)     qrEl.checked     = l.showQr     !== false;
+}
+
+function setColorPicker(key, hex) {
+  const input = document.getElementById('cp-' + key);
+  const dot   = document.getElementById('dot-' + key);
+  const label = document.getElementById('hex-' + key);
+  if (input) input.value = hex;
+  if (dot)   dot.style.background = hex;
+  if (label) label.textContent = hex;
+}
+
+function setOverrideColor(key, hex) {
+  if (!state.overrides) state.overrides = { colors: {}, layout: {} };
+  state.overrides.colors[key] = hex;
+  setColorPicker(key === 'cardBg' ? 'cardbg' : key, hex);
+  scheduleUpdate();
+}
+
+function setOverrideLayout(key, val) {
+  if (!state.overrides) state.overrides = { colors: {}, layout: {} };
+  state.overrides.layout[key] = val;
+  scheduleUpdate();
+}
+
+function resetOverrides() {
+  state.overrides = { colors: {}, layout: {}, envelope: {} };
+  syncCustomPanel();
+  scheduleUpdate();
+}
+
+function setOverrideEnvelope(key, val) {
+  if (!state.overrides) state.overrides = { colors: {}, layout: {}, envelope: {} };
+  if (!state.overrides.envelope) state.overrides.envelope = {};
+  state.overrides.envelope[key] = val;
+  if (key === 'color') setColorPicker('envcolor', val);
+  if (key === 'flapColor') setColorPicker('envflap', val);
+  scheduleUpdate();
+}
+
+function handleSealImage(input) {
+  if (!input.files.length) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    setOverrideEnvelope('sealImage', e.target.result);
+    renderSealPreview();
+  };
+  reader.readAsDataURL(input.files[0]);
+  input.value = '';
+}
+
+function removeSeal() {
+  if (state.overrides && state.overrides.envelope) {
+    delete state.overrides.envelope.sealImage;
+  }
+  renderSealPreview();
+  scheduleUpdate();
+}
+
+function renderSealPreview() {
+  var area = document.getElementById('seal-preview-area');
+  if (!area) return;
+  var env = Object.assign({}, normalizeEnvelope(state.template && state.template.envelope), (state.overrides && state.overrides.envelope) || {});
+  if (env.sealImage) {
+    area.innerHTML = '<div class="qr-preview"><img src="' + env.sealImage + '"><span class="qr-del" onclick="removeSeal()">Удалить</span></div>';
+  } else {
+    area.innerHTML = '';
+  }
+}
+
+function toggleCustomPanel() {
+  const panel  = document.getElementById('custom-panel');
+  const header = document.getElementById('custom-header');
+  panel.classList.toggle('open');
+  header.classList.toggle('open');
+}
+
+// ══════════════════════════════════════════════════════════════════
 //  Инициализация форм
 // ══════════════════════════════════════════════════════════════════
 
 function init() {
+  state.template  = TEMPLATES[0];
+  state.overrides = { colors: {}, layout: {}, envelope: {} };
+  renderTemplates();
+  syncCustomPanel();
   renderWishes();
   scheduleUpdate();
 }
@@ -896,9 +1291,91 @@ function collectState() {
 //  Генерация HTML открытки
 // ══════════════════════════════════════════════════════════════════
 
+function buildTemplateVars(tpl, overrides) {
+  const c = Object.assign({}, (tpl && tpl.colors) || {}, (overrides && overrides.colors) || {});
+  const t = (tpl && tpl.typography) || {};
+  return ':root{' +
+    (c.primary    ? '--color-primary:' + c.primary + ';'   : '') +
+    (c.cardBg     ? '--card-bg:'       + c.cardBg  + ';'   : '') +
+    (c.text       ? '--text-color:'    + c.text    + ';'   : '') +
+    (c.wishes     ? '--wishes-color:'  + c.wishes  + ';'   : '') +
+    (t.wishesSize ? '--wishes-size:'   + t.wishesSize + ';': '') +
+    (t.align      ? '--text-align:'    + t.align   + ';'   : '') +
+  '}';
+}
+
+function buildLayoutCss(tpl, overrides) {
+  const l = Object.assign({}, (tpl && tpl.layout) || {}, (overrides && overrides.layout) || {});
+  let css = '';
+  if (l.showSlider === false) css +=
+    '.sim-slider,.card-block,.header{display:none!important;}' +
+    '.qr-code{padding-top:24px!important;}' +
+    '.qr-col-info-flex{width:100%!important;max-width:100%!important;flex:1!important;}' +
+    '.row-flex{justify-content:center!important;}' +
+    '.mail-text,.mail-text__container,.mail-text__grats{text-align:center!important;width:100%!important;}' +
+    '#wishes,#recipientName,#senderName,#personalMessage,#event{text-align:center!important;}';
+  if (l.showQr     === false) css += '#qr,.qr-code__tabs,.qr-col-info-flex-wrap{display:none!important;}';
+  return css;
+}
+
+function normalizeEnvelope(e) {
+  if (!e) return {};
+  if (typeof e === 'string') return { theme: e, animation: 'drop' };
+  return e;
+}
+
+function buildEnvelopeCss(tpl, overrides) {
+  var env = Object.assign({}, normalizeEnvelope(tpl && tpl.envelope), (overrides && overrides.envelope) || {});
+  var css = '';
+  if (env.color || env.flapColor) {
+    css += '.envelope-custom #envelope-back{';
+    if (env.color) {
+      css += 'background:' + env.color + '!important;';
+      // Derive border from envelope color (slightly darker)
+      css += 'border-color:' + env.color + '!important;';
+    }
+    css += '}';
+    if (env.flapColor) {
+      var fc = env.flapColor;
+      css += '.envelope-custom .envelope-flap--up,.envelope-custom .envelope-flap--bottom{background-color:' + fc + '!important;}';
+      css += '.envelope-custom .envelope-flap--left{background:linear-gradient(125deg,' + fc + ' 42%,' + env.color + ' 100%)!important;}';
+      css += '.envelope-custom .envelope-flap--right{background:linear-gradient(234deg,' + fc + ' 42%,' + env.color + ' 100%)!important;}';
+    }
+  }
+  // Custom seal image
+  if (env.sealImage) {
+    css += '.open-btn img{content:url(' + env.sealImage + ')!important;}';
+  }
+  return css;
+}
+
+function getEnvelopeAnim(tpl, overrides) {
+  var env = Object.assign({}, normalizeEnvelope(tpl && tpl.envelope), (overrides && overrides.envelope) || {});
+  return env.animation || 'drop';
+}
+
+function getEnvelopeTheme(tpl, overrides) {
+  var env = Object.assign({}, normalizeEnvelope(tpl && tpl.envelope), (overrides && overrides.envelope) || {});
+  return env.theme || 'classic';
+}
+
 function generateCardHtml(skipAnim) {
-  const data = JSON.stringify(state, null, 2);
-  const extraCss = skipAnim ? NO_ANIM_CSS : '';
+  const data    = JSON.stringify(state, null, 2);
+  const tpl     = state.template  || null;
+  const ov      = state.overrides || {};
+  const tplVars   = buildTemplateVars(tpl, ov);
+  const tplLayout = buildLayoutCss(tpl, ov);
+  const envCss    = buildEnvelopeCss(tpl, ov);
+  const envAnim   = getEnvelopeAnim(tpl, ov);
+  const envTheme  = getEnvelopeTheme(tpl, ov);
+  const isDark    = envTheme === 'dark';
+  var tplEnv = normalizeEnvelope(tpl && tpl.envelope);
+  const hasCustomColor = (ov.envelope && (ov.envelope.color || ov.envelope.flapColor)) ||
+                         (tplEnv.color || tplEnv.flapColor);
+  var bodyClasses = [];
+  if (isDark) bodyClasses.push('envelope-dark');
+  if (hasCustomColor) bodyClasses.push('envelope-custom');
+  const extraCss = tplVars + tplLayout + envCss + (skipAnim ? NO_ANIM_CSS : '');
   return '<!DOCTYPE html>\\n' +
     '<html lang="ru">\\n' +
     '<head>\\n' +
@@ -907,7 +1384,7 @@ function generateCardHtml(skipAnim) {
     '  <title>' + (state.title || 'Открытка') + '</title>\\n' +
     '  <style>\\n' + CARD_CSS + '\\n' + STYLE_CSS + '\\n' + extraCss + '\\n  </style>\\n' +
     '</head>\\n' +
-    '<body>\\n' +
+    '<body class="' + bodyClasses.join(' ') + '" data-envelope-anim="' + envAnim + '">\\n' +
     CARD_BODY + '\\n' +
     '<script>const jsonData = ' + data + ';<\\/script>\\n' +
     '<script>' + JQUERY_JS + '<\\/script>\\n' +

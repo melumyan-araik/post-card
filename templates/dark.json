@@ -1,0 +1,24 @@
+{
+  "id": "dark",
+  "name": "Ночной",
+  "colors": {
+    "primary": "#a78bfa",
+    "cardBg": "#1e1b2e",
+    "text": "#e2d9f3",
+    "wishes": "#c4b5fd"
+  },
+  "envelope": {
+    "animation": "fade-scale",
+    "color": "#1e1b2e",
+    "flapColor": "#3d3560",
+    "theme": "dark"
+  },
+  "typography": {
+    "wishesSize": "16px",
+    "align": "center"
+  },
+  "layout": {
+    "showSlider": true,
+    "showQr": true
+  }
+}

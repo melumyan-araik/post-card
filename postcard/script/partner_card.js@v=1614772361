@@ -14,24 +14,22 @@ $(document).ready(function () {
         myHandler();
     }
     function startAnimation() {
-        // 1. Show back of envelope smoothly
+        window._cardOpened = true;
+        $('#_jsi_tooltip-holder').removeClass('hover');
+        $('#envelope-back').removeClass('envelope-wobble');
+
         setTimeout(
             function () {
-                // 1.1 Hide front envelope
-
-
-                    // 2. Move envelope down
-                    var envHeight = $('#envelope-front').height();
-                    var downHeight = parseInt(envHeight * 0.67);
-
                     var $elem = $('.envelop-rotate');
+
+                    // Perspective для 3D-эффекта клапана
+                    $elem.parent().css('perspective', '900px');
 
                     $({deg: 0}).animate({deg: 90}, {
                         duration: 400,
                         step: function (now) {
-
                             $elem.css({
-                                transform: 'rotateX(' + now + 'deg)'
+                                transform: 'perspective(900px) rotateX(' + now + 'deg)'
                             });
                         },
                         complete: function () {
@@ -39,9 +37,8 @@ $(document).ready(function () {
                             $({deg: 90}).animate({deg: 180}, {
                                 duration: 400,
                                 step: function (now) {
-
                                     $elem.css({
-                                        transform: 'rotateX(' + now + 'deg)'
+                                        transform: 'perspective(900px) rotateX(' + now + 'deg)'
                                     });
                                 },
                                 complete: function () {
@@ -54,33 +51,26 @@ $(document).ready(function () {
                                         }, 2001);
                                     });
                                     $('#gift-card').animate(
-
-                                        {top: '-500px'}
+                                        {top: '-500px'},
+                                        { duration: 600, easing: 'swing',
+                                          complete: function() {
+                                              // Fade-in содержимого карточки
+                                              $('.gift-card__inner').addClass('card-content-visible');
+                                          }
+                                        }
                                     );
                                     $('.envelope-flaps, .envelop-rotate').animate(
-                                        // { top: '-' + (downHeight + additional) + 'px' },
-                                        {
-                                            top: '300px',
-                                            opacity: 0
-                                        }, 1000
-                                    )
+                                        { top: '300px', opacity: 0 }, 1000
+                                    );
                                 }
                             });
                         }
                     });
 
-
-                    //
-                    $('#envelope-back').animate(
-                        {top: 500 + 'px'}, 1000
-                    );
-
-
-
+                    $('#envelope-back').animate({top: 500 + 'px'}, 1000);
             },
             200
         );
-
     }
 
 
@@ -100,88 +90,86 @@ function myHandler(e) {
 
 
     function startAnimation() {
+        window._cardOpened = true;
+        $('#_jsi_tooltip-holder').removeClass('hover');
+        $('#envelope-back').removeClass('envelope-wobble');
 
+        setTimeout(function () {
+            var $elem = $('.envelop-rotate');
+            $elem.parent().css('perspective', '900px');
 
-        // 1. Show back of envelope smoothly
-        setTimeout(
-            function () {
-                    // 2. Move envelope down
-                    var envHeight = $('#envelope-front').height();
-                    var downHeight = parseInt(envHeight * 0.67);
-
-
-
-
-
-                            // 3. Hide flap-up
-                            // $('#envelope-back').removeClass('envelope--close');
-                            // $('#envelope-back').addClass('envelope--open');
-                            var $elem = $('.envelop-rotate');
-
-                            $({deg: 0}).animate({deg: 90}, {
-                                duration: 400,
-                                step: function (now) {
-                                    // in the step-callback (that is fired each step of the animation),
-                                    // you can use the `now` paramter which contains the current
-                                    // animation-position (`0` up to `angle`)
-                                    $elem.css({
-                                        transform: 'rotateX(' + now + 'deg)'
-                                    });
-                                },
-                                complete: function () {
-                                    $('#envelope-back').addClass('envelope--open');
-                                    $({deg: 90}).animate({deg: 180}, {
-                                        duration: 400,
-                                        step: function (now) {
-                                            // in the step-callback (that is fired each step of the animation),
-                                            // you can use the `now` paramter which contains the current
-                                            // animation-position (`0` up to `angle`)
-                                            $elem.css({
-                                                transform: 'rotateX(' + now + 'deg)'
-                                            });
-                                        },
-                                        complete: function () {
-                                            setTimeout(function () {
-                                                $('.envelope-flaps').css('z-index', '5');
-                                                $('#gift-card').css('overflow', 'visible').css('z-index', '4')
-
-                                                setTimeout(function () {
-                                                    $('.envelope-flaps').css('display', 'none');
-                                                }, 1000);
-                                            });
-                                            $('#gift-card').animate(
-                                                // { top: '-' + (downHeight + additional) + 'px' },
-                                                {top: '-450px'}
-                                            );
-                                            $('.envelope-flaps, .envelop-rotate').animate(
-                                                // { top: '-' + (downHeight + additional) + 'px' },
-                                                {
-                                                    top: '500px',
-                                                    opacity: 0
-                                                }, 500
-                                            )
-                                        }
-                                    });
-                                }
+            $({deg: 0}).animate({deg: 90}, {
+                duration: 400,
+                step: function (now) {
+                    $elem.css({
+                        transform: 'perspective(900px) rotateX(' + now + 'deg)'
+                    });
+                },
+                complete: function () {
+                    $('#envelope-back').addClass('envelope--open');
+                    $({deg: 90}).animate({deg: 180}, {
+                        duration: 400,
+                        step: function (now) {
+                            $elem.css({
+                                transform: 'perspective(900px) rotateX(' + now + 'deg)'
                             });
-
-
-                            //
-                            $('#envelope-back').animate(
-                                {top: 500 + 'px'}, 1000
+                        },
+                        complete: function () {
+                            setTimeout(function () {
+                                $('.envelope-flaps').css('z-index', '5');
+                                $('#gift-card').css('overflow', 'visible').css('z-index', '4');
+                                setTimeout(function () {
+                                    $('.envelope-flaps').css('display', 'none');
+                                }, 1000);
+                            });
+                            $('#gift-card').animate(
+                                {top: '-450px'},
+                                {
+                                    duration: 600,
+                                    easing: 'swing',
+                                    complete: function () {
+                                        $('.gift-card__inner').addClass('card-content-visible');
+                                    }
+                                }
                             );
+                            $('.envelope-flaps, .envelop-rotate').animate(
+                                {top: '500px', opacity: 0}, 1000
+                            );
+                        }
+                    });
+                }
+            });
 
-            },
-            200
-        );
+            $('#envelope-back').animate(
+                {top: 500 + 'px'}, 1000
+            );
+        }, 200);
     }
 }
 
     setTimeout(function() {
-        $('.animation-block').removeClass('hide').addClass('bounceInLeft animated');
+        // Тип анимации входа из data-атрибута или по умолчанию drop
+        var entranceAnim = document.body.getAttribute('data-envelope-anim') || 'drop';
+        var animClass = 'envelope-' + entranceAnim;
+        $('.animation-block').removeClass('hide').addClass(animClass);
+
+        // Подсказка появляется быстрее
         setTimeout(function() {
             $('#_jsi_tooltip-holder').addClass('hover');
+        }, 2000);
+
+        // Покачивание каждые 4 сек если конверт не открыт
+        var _wobbleInterval = setInterval(function() {
+            if (window._cardOpened || !$('.envelop-rotate').is(':visible')) {
+                clearInterval(_wobbleInterval);
+                return;
+            }
+            $('#envelope-back').addClass('envelope-wobble');
+            setTimeout(function() {
+                $('#envelope-back').removeClass('envelope-wobble');
+            }, 800);
         }, 4000);
+
     }, 1000);
 
     // Masked input
